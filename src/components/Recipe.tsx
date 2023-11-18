@@ -3,9 +3,11 @@
 import Image from "next/image";
 import {
   Box,
+  Button,
   Flex,
   Headline,
   Icon,
+  Link,
   List,
   ListItem,
   ListItemIcon,
@@ -13,17 +15,43 @@ import {
   TextBit,
 } from "brainly-style-guide";
 import React from "react";
-import css from "./Recipes.module.scss";
-import { Recipe } from "@/recipes/types";
+import css from "./Recipe.module.scss";
+import { RecipeType } from "@/recipes/types";
+import { useSearchParams } from "next/navigation";
+export const Recipe = ({ recipe }: { recipe: RecipeType }) => {
+  const searchParams = useSearchParams();
 
-export const Recipes = ({ recipe }: { recipe: Recipe }) => {
-  console.log({ recipe });
+  const page = React.useMemo(() => {
+    try {
+      return Number(searchParams.get("page"));
+    } catch {
+      return undefined;
+    }
+  }, [searchParams]);
+
   return (
     <Flex alignItems="center" direction="column" className={css.container}>
       <Box padding="m">
-        <Headline align="to-center" size="xlarge" color="text-white">
-          {recipe.name}
-        </Headline>
+        <Flex alignItems="center">
+          {page ? (
+            <Link href={`/recipes/${page}`}>
+              <Button variant="outline-inverted">
+                <Icon size={32} color="icon-white" type="arrow_left" />
+              </Button>
+            </Link>
+          ) : (
+            <Link href={`/recipes/1`}>
+              <Button variant="outline-inverted">
+                <Icon size={32} color="icon-white" type="arrow_left" />
+              </Button>
+            </Link>
+          )}
+          <Flex marginLeft='s'>
+            <Headline align="to-center" size="xlarge" color="text-white">
+              {recipe.name}
+            </Headline>
+          </Flex>
+        </Flex>
       </Box>
       <Image
         width={1218}

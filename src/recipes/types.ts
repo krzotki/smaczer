@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 
-export interface Recipe {
+export interface RecipeType {
   _id: string;
   id: number;
   name: string;
