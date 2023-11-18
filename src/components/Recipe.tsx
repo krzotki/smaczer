@@ -92,6 +92,7 @@ export const Recipes = ({ recipe }: { recipe: Recipe }) => {
                         width={302}
                         height={200}
                         alt={step.description}
+                        className={css.stepImage}
                       ></Image>
                     ) : null}
                   </Flex>
