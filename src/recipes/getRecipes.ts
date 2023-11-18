@@ -1,11 +1,13 @@
 import { MongoClient, ObjectId } from "mongodb";
-import { Recipe } from "./types";
+import { RecipeType } from "./types";
 import { dbName, dbUrl } from "./config";
 
+const MAX_PAGE_SIZE = 21;
 
-const MAX_PAGE_SIZE = 20;
-
-export type RecipeListItem = Pick<Recipe, "_id" | "id" | "name" | "photoPath">;
+export type RecipeListItem = Pick<
+  RecipeType,
+  "_id" | "id" | "name" | "photoPath"
+>;
 
 export const getRecipes = (page: number) => {
   return new Promise<RecipeListItem[]>((resolve, reject) => {
@@ -16,6 +18,9 @@ export const getRecipes = (page: number) => {
         // Read Data from a Collection
         db.collection("recipes")
           .find({})
+          .sort({
+            _id: 1,
+          })
           .skip((page - 1) * MAX_PAGE_SIZE)
           .limit(MAX_PAGE_SIZE)
           .toArray()
@@ -42,7 +47,7 @@ export const getRecipes = (page: number) => {
 };
 
 export const getRecipe = (id: string) => {
-  return new Promise<Recipe>((resolve, reject) => {
+  return new Promise<RecipeType>((resolve, reject) => {
     MongoClient.connect(dbUrl)
       .then((client) => {
         const db = client.db(dbName);
@@ -57,7 +62,7 @@ export const getRecipe = (id: string) => {
               const { _id, ...rest } = item;
               console.log({ rest, item });
               resolve({
-                ...(rest as Recipe),
+                ...(rest as RecipeType),
                 _id: _id.toString(),
               });
             } else {
