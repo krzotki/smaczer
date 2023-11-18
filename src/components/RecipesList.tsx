@@ -56,7 +56,7 @@ export const RecipesList = ({
       >
         {recipes.map((recipe) => {
           return (
-            <Link key={recipe._id} href={`/recipe/${recipe._id}`}>
+            <Link key={recipe._id} href={`/recipe/${recipe._id}?page=${page}`}>
               <Flex
                 marginBottom="l"
                 marginLeft="s"

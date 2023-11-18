@@ -1,5 +1,5 @@
 import { InsertOneResult, MongoClient, ObjectId } from "mongodb";
-import { Recipe } from "./types";
+import { RecipeType } from "./types";
 import { dbName, dbUrl } from "./config";
 import axios from "axios";
 import cheerio from "cheerio";
@@ -16,7 +16,7 @@ export const addRecipeFromUrl = (url: string) => {
       return;
     }
 
-    let recipe: Recipe;
+    let recipe: RecipeType;
     try {
       recipe = await getRecipeFromUrl(url);
     } catch (e) {
@@ -52,7 +52,7 @@ export const addRecipeFromUrl = (url: string) => {
 };
 
 const getRecipeFromUrl = (url: string) => {
-  return new Promise<Recipe>(async (resolve, reject) => {
+  return new Promise<RecipeType>(async (resolve, reject) => {
     try {
       const response = await axios.get(url);
 
