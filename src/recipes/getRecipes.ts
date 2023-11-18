@@ -1,7 +1,9 @@
 import { MongoClient, ObjectId } from "mongodb";
 import { Recipe } from "./types";
 
-const url: string = `mongodb://root:example@mongo:27017/?authSource=admin`;
+const MONGO_HOST = process.env.MONGO_HOST;
+
+const url: string = `mongodb://root:example@${MONGO_HOST}:27017/?authSource=admin`;
 const dbName: string = "recipes";
 
 const MAX_PAGE_SIZE = 20;
