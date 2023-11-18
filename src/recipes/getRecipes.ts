@@ -1,10 +1,7 @@
 import { MongoClient, ObjectId } from "mongodb";
 import { Recipe } from "./types";
+import { dbName, dbUrl } from "./config";
 
-const MONGO_HOST = process.env.MONGO_HOST;
-
-const url: string = `mongodb://root:example@${MONGO_HOST}:27017/?authSource=admin`;
-const dbName: string = "recipes";
 
 const MAX_PAGE_SIZE = 20;
 
@@ -12,7 +9,7 @@ export type RecipeListItem = Pick<Recipe, "_id" | "id" | "name" | "photoPath">;
 
 export const getRecipes = (page: number) => {
   return new Promise<RecipeListItem[]>((resolve, reject) => {
-    MongoClient.connect(url)
+    MongoClient.connect(dbUrl)
       .then((client) => {
         const db = client.db(dbName);
 
@@ -46,7 +43,7 @@ export const getRecipes = (page: number) => {
 
 export const getRecipe = (id: string) => {
   return new Promise<Recipe>((resolve, reject) => {
-    MongoClient.connect(url)
+    MongoClient.connect(dbUrl)
       .then((client) => {
         const db = client.db(dbName);
 
