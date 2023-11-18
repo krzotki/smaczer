@@ -24,8 +24,8 @@ export const RecipesList = ({
 }) => {
   console.log({ recipes });
   return (
-    <Flex direction="column" className={css.container}>
-      <Flex justifyContent="space-evenly" className={css.header}>
+    <Flex direction="column" className={css.container} alignItems='center'>
+      <Flex justifyContent="space-evenly" className={css.header} fullWidth>
         {page > 1 ? (
           <Link href={`./${page - 1}`}>
             <Button variant="outline-inverted">
@@ -53,6 +53,7 @@ export const RecipesList = ({
         marginLeft="m"
         marginRight="m"
         justifyContent="space-evenly"
+        className={css.list}
       >
         {recipes.map((recipe) => {
           return (
