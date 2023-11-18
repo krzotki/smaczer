@@ -1,0 +1,26 @@
+
+.box {
+  max-width: 400px;
+  width: 400px;
+
+  height: 200px;
+  max-height: 200px;
+}
+
+.image {
+  border-radius: 4px;
+  height: 100%;
+  width: auto;
+}
+
+.container {
+  overflow-y: auto;
+  height: 100%;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  background-color: black;
+  padding: 24px;
+}
