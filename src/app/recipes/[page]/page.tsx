@@ -8,7 +8,6 @@ export default async function Recipes({
   params: { page: number };
 }) {
   const recipes = await getRecipes(params.page);
-  console.log({ recipes, params });
   return (
     <RecipesList recipes={recipes} page={Number(params.page)}/>
   );

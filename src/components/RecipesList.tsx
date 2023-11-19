@@ -22,7 +22,6 @@ export const RecipesList = ({
   recipes: RecipeListItem[];
   page: number;
 }) => {
-  console.log({ recipes });
   return (
     <Flex direction="column" className={css.container} alignItems='center'>
       <Flex justifyContent="space-evenly" className={css.header} fullWidth>
