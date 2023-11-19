@@ -17,7 +17,7 @@ import {
 import React from "react";
 import css from "./Recipe.module.scss";
 import { RecipeType } from "@/recipes/types";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 export const Recipe = ({ recipe }: { recipe: RecipeType }) => {
   const searchParams = useSearchParams();
 
@@ -28,6 +28,8 @@ export const Recipe = ({ recipe }: { recipe: RecipeType }) => {
       return undefined;
     }
   }, [searchParams]);
+
+  const { back } = useRouter();
 
   return (
     <Flex alignItems="center" direction="column" className={css.container}>
@@ -40,13 +42,11 @@ export const Recipe = ({ recipe }: { recipe: RecipeType }) => {
               </Button>
             </Link>
           ) : (
-            <Link href={`/recipes/1`}>
-              <Button variant="outline-inverted">
-                <Icon size={32} color="icon-white" type="arrow_left" />
-              </Button>
-            </Link>
+            <Button variant="outline-inverted" onClick={back}>
+              <Icon size={32} color="icon-white" type="arrow_left" />
+            </Button>
           )}
-          <Flex marginLeft='s'>
+          <Flex marginLeft="s">
             <Headline align="to-center" size="xlarge" color="text-white">
               {recipe.name}
             </Headline>

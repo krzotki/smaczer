@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
 import { AddRecipeButton } from "@/components/AddRecipeButton";
+import { SearchForm } from "@/components/SearchForm";
 
 const inter = Inter({ subsets: ["latin"] });
 
