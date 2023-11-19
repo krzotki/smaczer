@@ -60,7 +60,6 @@ export const getRecipe = (id: string) => {
           .then((item) => {
             if (item) {
               const { _id, ...rest } = item;
-              console.log({ rest, item });
               resolve({
                 ...(rest as RecipeType),
                 _id: _id.toString(),

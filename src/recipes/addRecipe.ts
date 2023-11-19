@@ -3,6 +3,38 @@ import { RecipeType } from "./types";
 import { dbName, dbUrl } from "./config";
 import axios from "axios";
 import cheerio from "cheerio";
+import weaviate from "weaviate-ts-client";
+import { WeaviateStore } from "langchain/vectorstores/weaviate";
+import { OpenAIEmbeddings } from "langchain/embeddings/openai";
+
+export const setupWeaviate = async () => {
+  const weaviateClient = (weaviate as any).client({
+    scheme: process.env.WEAVIATE_SCHEME || "https",
+    host: process.env.WEAVIATE_HOST || "localhost",
+    apiKey: new (weaviate as any).ApiKey(
+      process.env.WEAVIATE_API_KEY || "default"
+    ),
+  });
+  console.log({ weaviateClient });
+  try {
+    const store = await WeaviateStore.fromTexts(
+      ["hello world", "hi there", "how are you", "bye now"],
+      [{ foo: "bar" }, { foo: "baz" }, { foo: "qux" }, { foo: "bar" }],
+      new OpenAIEmbeddings({
+        openAIApiKey: process.env.OPEN_AI_API_KEY,
+      }),
+      {
+        client: weaviateClient,
+        indexName: "Smaczer",
+        textKey: "text",
+        metadataKeys: ["foo"],
+      }
+    );
+    console.log({ store });
+  } catch (e) {
+    console.log({ e });
+  }
+};
 
 export const addRecipeFromUrl = (url: string) => {
   return new Promise<InsertOneResult>(async (resolve, reject) => {
@@ -23,8 +55,6 @@ export const addRecipeFromUrl = (url: string) => {
       reject(e);
       return;
     }
-
-    console.log({ recipe });
 
     MongoClient.connect(dbUrl)
       .then((client) => {

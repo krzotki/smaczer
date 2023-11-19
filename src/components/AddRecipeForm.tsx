@@ -40,8 +40,6 @@ export const AddRecipeForm = () => {
     setUrl(evt.target.value);
   }, []);
 
-  console.log({ url, error });
-
   return (
     <form onSubmit={sendRecipe}>
       <Box>
