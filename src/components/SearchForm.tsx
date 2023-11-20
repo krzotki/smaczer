@@ -5,10 +5,14 @@ import React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import css from "./SearchForm.module.scss";
 
-export const SearchForm = () => {
-  const searchParams = useSearchParams();
+export const SearchForm = ({
+  initialIngredients,
+}: {
+  initialIngredients?: string;
+}) => {
+  console.log({initialIngredients})
   const [ingredients, setIngredients] = React.useState(
-    searchParams.get("ingredients") || ""
+    initialIngredients || ""
   );
 
   const [error, setError] = React.useState<string>();
@@ -32,12 +36,12 @@ export const SearchForm = () => {
 
   return (
     <form onSubmit={search} className={css.form}>
-      <Box padding={['xs', 'm']}>
+      <Box padding={["xs", "m"]}>
         <Flex
           direction={["column", "row", "row"]}
           alignItems="center"
-          justifyContent='flex-start'
-          marginLeft={['none', 'l']}
+          justifyContent="flex-start"
+          marginLeft={["none", "l"]}
         >
           <Flex marginRight={["none", "m", "m"]}>
             <Input
@@ -45,6 +49,7 @@ export const SearchForm = () => {
               onChange={handleInputChange}
               errorMessage={error}
               invalid={!!error}
+              value={ingredients}
             />
           </Flex>
           <Flex marginTop={["s", "none"]}>

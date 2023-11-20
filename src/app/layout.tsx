@@ -26,7 +26,6 @@ export default function RootLayout({
         />
         <Script src="https://styleguide.brainly.com/images/icons-f71af3176e.js" />
         {children}
-        <AddRecipeButton />
       </body>
     </html>
   );

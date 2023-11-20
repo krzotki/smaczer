@@ -10,6 +10,7 @@
 
 .stepImage {
   height: auto;
+  max-width: 100%;
 }
 
 $ingredientsColor: #2a9961;
@@ -21,4 +22,9 @@ $ingredientsColor: #2a9961;
 .steps {
   border-color: $ingredientsColor !important;
   padding-bottom: 40px !important;
+}
+
+.fullWidth {
+  box-sizing: border-box;
+  width: 100%;
 }

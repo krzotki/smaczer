@@ -1,14 +1,21 @@
+import { AddRecipeButton } from "@/components/AddRecipeButton";
 import { RecipesList } from "@/components/RecipesList";
-import { getRecipes, getRecipesByIngredients } from "@/recipes/getRecipes";
-import { useSearchParams } from "next/navigation";
-import React from "react";
+import { getRecipesByIngredients } from "@/recipes/getRecipes";
+import React, { Suspense } from "react";
+import Loading from "./loading";
 
 export default async function Recipes({
   params,
 }: {
   params: { ingredients: string };
 }) {
-  const recipes = await getRecipesByIngredients(params.ingredients || "", 8);
-  console.log({recipes})
-  return <RecipesList recipes={recipes} />;
+  const parsedIngredients = decodeURIComponent(params.ingredients);
+  const recipes = await getRecipesByIngredients(parsedIngredients || "", 8);
+  console.log({ recipes, params });
+  return (
+    <Suspense fallback={<Loading />}>
+      <RecipesList recipes={recipes} initialIngredients={parsedIngredients} />
+      <AddRecipeButton />
+    </Suspense>
+  );
 }

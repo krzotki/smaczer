@@ -119,8 +119,9 @@ export const getRecipesByIngredients = async (
   const recipes = await getAllRecipes();
 
   const vectorStore = await MemoryVectorStore.fromTexts(
-    recipes.map((recipe) =>
-      `
+    recipes.map(
+      (recipe) =>
+        `
       ${recipe.name}
       ${JSON.stringify(
         recipe.ingredients.map(({ items }) =>
@@ -138,7 +139,13 @@ export const getRecipesByIngredients = async (
     new OpenAIEmbeddings()
   );
 
-  const resultOne = await vectorStore.similaritySearch(ingredients, count);
-
-  return resultOne.map((document) => document.metadata) as RecipeListItem[];
+  // const resultOne = await vectorStore.similaritySearch(ingredients, count);
+  const resultTwo = await vectorStore.similaritySearchWithScore(
+    ingredients,
+    count
+  );
+  console.log({ resultTwo });
+  return resultTwo.map(
+    ([document, score]) => document.metadata
+  ) as RecipeListItem[];
 };

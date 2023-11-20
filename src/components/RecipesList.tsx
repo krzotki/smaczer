@@ -22,8 +22,10 @@ const MAX_NAME_LENGTH = 30;
 export const RecipesList = ({
   recipes,
   page,
+  initialIngredients,
 }: {
   recipes: RecipeListItem[];
+  initialIngredients?: string;
   page?: number;
 }) => {
   return (
@@ -35,12 +37,12 @@ export const RecipesList = ({
         fullWidth
         className={css.navigation}
       >
-        <Link href="/">
-          <Box padding={['xs', 'm']}>
+        <Link href="/recipes/1">
+          <Box padding={["xs", "m"]}>
             <TextBit>Smaczer</TextBit>
           </Box>
         </Link>
-        <SearchForm />
+        <SearchForm initialIngredients={initialIngredients} />
       </Flex>
       {page ? (
         <Flex justifyContent="space-evenly" className={css.header} fullWidth>
@@ -83,7 +85,7 @@ export const RecipesList = ({
               key={recipe._id}
             >
               <Link
-                href={`/recipe/${recipe._id}?page=${page}`}
+                href={`/recipe/${recipe._id}` + (page ? `?page=${page}` : "")}
                 className={css.link}
               >
                 <Box border borderColor="green-30">

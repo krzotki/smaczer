@@ -105,14 +105,14 @@ export const Recipe = ({ recipe }: { recipe: RecipeType }) => {
               Przygotowanie:
             </Headline>
           </Flex>
-          <List spaced>
+          <List spaced className={css.fullWidth}>
             {recipe.steps.map((step, index) => (
-              <ListItem key={step.description}>
+              <ListItem key={step.description} className={css.fullWidth}>
                 <ListItemIcon>
                   <TextBit>{index + 1}</TextBit>
                 </ListItemIcon>
-                <Box padding="m">
-                  <Flex direction="column">
+                <Box padding="m" className={css.fullWidth}>
+                  <Flex direction="column" fullWidth>
                     <Text color="text-white">{step.description}</Text>
                     {step.photoPath ? (
                       <Image
