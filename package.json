@@ -6,7 +6,8 @@
     "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "redeploy": "git fetch && git rebase && docker compose down && docker compose up -d --build"
   },
   "dependencies": {
     "axios": "^1.6.2",
