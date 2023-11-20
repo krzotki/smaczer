@@ -33,8 +33,12 @@ export const SearchForm = () => {
   return (
     <form onSubmit={search} className={css.form}>
       <Box>
-        <Flex direction="row" alignItems="center" justifyContent="center">
-          <Flex marginRight="m">
+        <Flex
+          direction={["column", "row", "row"]}
+          alignItems="center"
+          justifyContent="center"
+        >
+          <Flex marginRight={["none", "m", "m"]}>
             <Input
               placeholder="kurczak fasola ser"
               onChange={handleInputChange}
@@ -42,9 +46,11 @@ export const SearchForm = () => {
               invalid={!!error}
             />
           </Flex>
-          <Button type="submit" variant="outline-inverted">
-            Szukaj
-          </Button>
+          <Flex marginTop={["s", "none"]}>
+            <Button type="submit" variant="outline-inverted">
+              Szukaj
+            </Button>
+          </Flex>
         </Flex>
       </Box>
     </form>

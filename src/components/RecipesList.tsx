@@ -9,12 +9,15 @@ import {
   CardButton,
   Box,
   Icon,
+  TextBit,
 } from "brainly-style-guide";
 import Link from "next/link";
 import React from "react";
 import { RecipeListItem } from "@/recipes/getRecipes";
 import css from "./RecipesList.module.scss";
 import { SearchForm } from "./SearchForm";
+
+const MAX_NAME_LENGTH = 60;
 
 export const RecipesList = ({
   recipes,
@@ -25,7 +28,20 @@ export const RecipesList = ({
 }) => {
   return (
     <Flex direction="column" className={css.container} alignItems="center">
-      <SearchForm />
+      <Flex
+        direction={["column", "row"]}
+        alignItems="center"
+        justifyContent={["center", "flex-start"]}
+        fullWidth
+        className={css.navigation}
+      >
+        <Link href="/">
+          <Box>
+            <TextBit>Smaczer</TextBit>
+          </Box>
+        </Link>
+        <SearchForm />
+      </Flex>
       {page ? (
         <Flex justifyContent="space-evenly" className={css.header} fullWidth>
           {page > 1 ? (
@@ -50,26 +66,29 @@ export const RecipesList = ({
         </Flex>
       ) : null}
       <Flex
-        direction="row"
+        direction={["column", "column", "row"]}
         wrap
         marginTop="m"
-        marginLeft="m"
-        marginRight="m"
+        alignItems="center"
         justifyContent="space-evenly"
         className={css.list}
       >
         {recipes.map((recipe) => {
           return (
-            <Link key={recipe._id} href={`/recipe/${recipe._id}?page=${page}`}>
-              <Flex
-                marginBottom="l"
-                marginLeft="s"
-                marginRight="s"
-                className={css.box}
+            <Flex
+              marginBottom="l"
+              marginLeft="s"
+              marginRight="s"
+              className={css.box}
+              key={recipe._id}
+            >
+              <Link
+                href={`/recipe/${recipe._id}?page=${page}`}
+                className={css.link}
               >
                 <Box border borderColor="green-30">
                   <Flex
-                    direction="row"
+                    direction={["column", "row", "row"]}
                     alignItems="center"
                     fullHeight
                     fullWidth
@@ -83,15 +102,20 @@ export const RecipesList = ({
                       className={css.image}
                     />
 
-                    <Flex marginLeft="m">
+                    <Flex
+                      marginLeft={["none", "m", "m"]}
+                      marginTop={["s", "none"]}
+                    >
                       <Headline color="text-white" size="small">
-                        {recipe.name}
+                        {recipe.name.length > MAX_NAME_LENGTH
+                          ? `${recipe.name.slice(0, MAX_NAME_LENGTH - 3)}...`
+                          : recipe.name}
                       </Headline>
                     </Flex>
                   </Flex>
                 </Box>
-              </Flex>
-            </Link>
+              </Link>
+            </Flex>
           );
         })}
       </Flex>
