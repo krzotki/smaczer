@@ -32,11 +32,12 @@ export const SearchForm = () => {
 
   return (
     <form onSubmit={search} className={css.form}>
-      <Box>
+      <Box padding={['xs', 'm']}>
         <Flex
           direction={["column", "row", "row"]}
           alignItems="center"
-          justifyContent="center"
+          justifyContent='flex-start'
+          marginLeft={['none', 'l']}
         >
           <Flex marginRight={["none", "m", "m"]}>
             <Input

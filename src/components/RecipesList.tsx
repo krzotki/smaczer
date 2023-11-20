@@ -17,7 +17,7 @@ import { RecipeListItem } from "@/recipes/getRecipes";
 import css from "./RecipesList.module.scss";
 import { SearchForm } from "./SearchForm";
 
-const MAX_NAME_LENGTH = 60;
+const MAX_NAME_LENGTH = 30;
 
 export const RecipesList = ({
   recipes,
@@ -36,7 +36,7 @@ export const RecipesList = ({
         className={css.navigation}
       >
         <Link href="/">
-          <Box>
+          <Box padding={['xs', 'm']}>
             <TextBit>Smaczer</TextBit>
           </Box>
         </Link>
@@ -70,15 +70,15 @@ export const RecipesList = ({
         wrap
         marginTop="m"
         alignItems="center"
-        justifyContent="space-evenly"
+        justifyContent="space-between"
         className={css.list}
       >
         {recipes.map((recipe) => {
           return (
             <Flex
               marginBottom="l"
-              marginLeft="s"
-              marginRight="s"
+              marginLeft={["none", "s"]}
+              marginRight={["none", "s"]}
               className={css.box}
               key={recipe._id}
             >
