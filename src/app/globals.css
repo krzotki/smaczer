@@ -102,3 +102,10 @@ a {
 html {
   color-scheme: dark;
 }
+
+.sg-chip.sg-chip--custom-theme {
+  --chipCheckedBorderColor: #60d399;
+}
+.sg-chip.sg-chip--custom-theme .sg-chip__input:checked + .sg-chip__pill {
+  border-width: 3px;
+}

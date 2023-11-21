@@ -3,6 +3,7 @@ import { RecipeType } from "./types";
 import { dbName, dbUrl } from "./config";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
+import { RandomLCG } from "@/utils/random";
 
 const MAX_PAGE_SIZE = 21;
 
@@ -112,6 +113,19 @@ export const getRecipe = (id: string) => {
   });
 };
 
+const WEEK = 1000 * 60 * 60 * 24 * 7;
+export const gerRandomRecipesForWeek = async (
+  count: number
+): Promise<RecipeListItem[]> => {
+  const recipes = await getAllRecipes();
+
+  const seed = Math.floor(Date.now() / WEEK);
+
+  const rng = new RandomLCG(seed);
+
+  return rng.pickRandomElements(recipes, count);
+};
+
 export const getRecipesByIngredients = async (
   ingredients: string,
   count: number
@@ -144,7 +158,7 @@ export const getRecipesByIngredients = async (
     ingredients,
     count
   );
-  console.log({ resultTwo });
+
   return resultTwo.map(
     ([document, score]) => document.metadata
   ) as RecipeListItem[];

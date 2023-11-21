@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Button, Flex, Input } from "brainly-style-guide";
+import { Box, Button, Flex, Icon, Input } from "brainly-style-guide";
 import React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import css from "./SearchForm.module.scss";
@@ -10,7 +10,6 @@ export const SearchForm = ({
 }: {
   initialIngredients?: string;
 }) => {
-  console.log({initialIngredients})
   const [ingredients, setIngredients] = React.useState(
     initialIngredients || ""
   );
@@ -38,9 +37,9 @@ export const SearchForm = ({
     <form onSubmit={search} className={css.form}>
       <Box padding={["xs", "m"]}>
         <Flex
-          direction={["column", "row", "row"]}
+          direction="row"
           alignItems="center"
-          justifyContent="flex-start"
+          justifyContent={["space-between", "flex-start"]}
           marginLeft={["none", "l"]}
         >
           <Flex marginRight={["none", "m", "m"]}>
@@ -50,11 +49,12 @@ export const SearchForm = ({
               errorMessage={error}
               invalid={!!error}
               value={ingredients}
+              className={css.input}
             />
           </Flex>
-          <Flex marginTop={["s", "none"]}>
+          <Flex>
             <Button type="submit" variant="outline-inverted">
-              Szukaj
+              <Icon type="search" size={24} />
             </Button>
           </Flex>
         </Flex>

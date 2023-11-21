@@ -1,36 +1,27 @@
 .box {
   max-width: 100%;
   width: 450px;
-
   height: 250px;
   max-height: 250px;
   box-sizing: border-box;
 }
 
+.grayBackground {
+  background-color: #191919 !important;
+}
 .image {
   border-radius: 4px;
   max-width: 90%;
   height: auto;
 }
 
-.container {
-  overflow-y: auto;
-  height: 100%;
-  padding-bottom: 40px;
-}
-
 .header {
   position: sticky;
   top: 0;
-  background-color: black;
-  padding: 24px;
+  background-color: black !important;
 }
 
 .list {
-  max-width: min(1500px, 90%);
-}
-
-.navigation {
   max-width: min(1500px, 90%);
 }
 
@@ -38,4 +29,3 @@
   width: 100%;
   height: 100%;
 }
-

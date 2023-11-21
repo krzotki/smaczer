@@ -22,47 +22,38 @@ const MAX_NAME_LENGTH = 30;
 export const RecipesList = ({
   recipes,
   page,
-  initialIngredients,
 }: {
   recipes: RecipeListItem[];
-  initialIngredients?: string;
   page?: number;
 }) => {
   return (
-    <Flex direction="column" className={css.container} alignItems="center">
-      <Flex
-        direction={["column", "row"]}
-        alignItems="center"
-        justifyContent={["center", "flex-start"]}
-        fullWidth
-        className={css.navigation}
-      >
-        <Link href="/recipes/1">
-          <Box padding={["xs", "m"]}>
-            <TextBit>Smaczer</TextBit>
-          </Box>
-        </Link>
-        <SearchForm initialIngredients={initialIngredients} />
-      </Flex>
+    <>
       {page ? (
-        <Flex justifyContent="space-evenly" className={css.header} fullWidth>
+        <Flex
+          justifyContent="space-evenly"
+          fullWidth
+          alignItems="center"
+          marginTop="m"
+          className={css.header}
+          marginBottom='m'
+        >
           {page > 1 ? (
             <Link href={`./${page - 1}`}>
               <Button variant="outline-inverted">
-                <Icon size={32} color="icon-white" type="arrow_left" />
+                <Icon size={24} color="icon-white" type="arrow_left" />
               </Button>
             </Link>
           ) : (
             <Button disabled variant="outline-inverted">
-              <Icon size={32} color="icon-white" type="arrow_left" />
+              <Icon size={24} color="icon-white" type="arrow_left" />
             </Button>
           )}
-          <Headline size="large" color="text-white">
+          <TextBit size={["small"]} color="text-white">
             Strona {page}
-          </Headline>
+          </TextBit>
           <Link href={`./${page + 1}`}>
             <Button variant="outline-inverted">
-              <Icon size={32} color="icon-white" type="arrow_right" />
+              <Icon size={24} color="icon-white" type="arrow_right" />
             </Button>
           </Link>
         </Flex>
@@ -70,7 +61,6 @@ export const RecipesList = ({
       <Flex
         direction={["column", "column", "row"]}
         wrap
-        marginTop="m"
         alignItems="center"
         justifyContent="space-between"
         className={css.list}
@@ -88,7 +78,7 @@ export const RecipesList = ({
                 href={`/recipe/${recipe._id}` + (page ? `?page=${page}` : "")}
                 className={css.link}
               >
-                <Box border borderColor="green-30">
+                <Box shadow className={css.grayBackground}>
                   <Flex
                     direction={["column", "row", "row"]}
                     alignItems="center"
@@ -121,6 +111,6 @@ export const RecipesList = ({
           );
         })}
       </Flex>
-    </Flex>
+    </>
   );
 };

@@ -8,8 +8,10 @@ export const AddRecipeButton = () => {
     <Flex className={css.button}>
       <Link href="/recipe/add/">
         <Button variant="solid-inverted" type="button">
-          <Icon type="plus" size={32} color="icon-black" />
-          Dodaj przepis
+          <Flex fullWidth alignItems="center" justifyContent="space-between">
+            <Icon type="plus" size={32} color="icon-black" />
+            Dodaj przepis
+          </Flex>
         </Button>
       </Link>
     </Flex>
