@@ -1,7 +1,13 @@
-import { MongoClient, OptionalId, WithId } from "mongodb";
+import { MongoClient, ObjectId, OptionalId, WithId } from "mongodb";
 import { dbName, dbUrl } from "./config";
 import { RandomLCG } from "@/utils/random";
 import { COLLECTION_ALL_RECIPES } from "./getRecipes";
+import { RecipeType } from "./types";
+import {
+  getIngredientsPrice,
+  ingredientsToString,
+  updateRecipe,
+} from "./addRecipe";
 
 export const COLLECTION_WEEKLY_RECIPES = "recipes_weekly";
 
@@ -27,13 +33,18 @@ export const rollWeeklyRecipes = () => {
           await db.createCollection(collectionName);
         }
 
-        const recipes = await new Promise<WithId<Document>[]>(
+        const recipes = await new Promise<Array<RecipeType>>(
           (resolve, reject) => {
             db.collection(COLLECTION_ALL_RECIPES)
               .find({})
               .toArray()
               .then((items) => {
-                resolve(items as WithId<Document>[]);
+                resolve(
+                  items.map(({ _id, ...rest }) => ({
+                    ...(rest as RecipeType),
+                    _id: _id.toString(),
+                  }))
+                );
               })
               .catch((error) => {
                 reject(error);
@@ -42,9 +53,44 @@ export const rollWeeklyRecipes = () => {
         );
 
         const randomRecipes = rng.pickRandomElements(recipes, 10);
+        const withCost = await Promise.all(
+          randomRecipes.map(async (recipe) => {
+            console.log({ recipe });
+            if (recipe.ingredientsCost) {
+              return recipe;
+            }
+
+            const cost = await getIngredientsPrice(ingredientsToString(recipe));
+
+            const updateRes = await db
+              .collection(COLLECTION_ALL_RECIPES)
+              .updateOne(
+                {
+                  _id: new ObjectId(recipe._id),
+                },
+                {
+                  $set: {
+                    ingredientsCost: cost,
+                  },
+                }
+              );
+
+              console.log({updateRes})
+
+            return {
+              ...recipe,
+              ingredientsCost: cost,
+            };
+          })
+        );
 
         db.collection(collectionName)
-          .insertMany(randomRecipes as OptionalId<Document>[])
+          .insertMany(
+            withCost.map((recipe) => ({
+              ...recipe,
+              _id: new ObjectId(recipe._id),
+            }))
+          )
           .then((result) => {
             resolve(result);
             client.close();

@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 
 export interface RecipeType {
+  ingredientsCost?: string | null;
   _id: string;
   id: number;
   name: string;

@@ -1,23 +1,44 @@
 "use client";
 
-import { Button, Flex } from "brainly-style-guide";
+import { Button, Flex, TextBit, Tooltip } from "brainly-style-guide";
 import { useRouter } from "next/navigation";
 import React from "react";
 
 export const RollWeeklyRecipesButton = () => {
   const { refresh } = useRouter();
+  const [loading, setLoading] = React.useState(false);
   const handleClick = React.useCallback(async () => {
+    setLoading(true);
     const res = await fetch("/api/roll-recipes");
     const data = await res.json();
-    console.log({data})
+    console.log({ data });
+    setLoading(false);
     if (data.acknowledged) {
       refresh();
     }
   }, [refresh]);
 
   return (
-    <Flex fullWidth justifyContent="center" marginTop="m">
-      <Button onClick={handleClick} variant="solid-inverted">
+    <Flex
+      fullWidth
+      justifyContent="center"
+      marginTop="m"
+      direction="column"
+      alignItems="center"
+    >
+      {loading && (
+        <Flex marginBottom="m">
+          <TextBit size="small" color="text-white">
+            Szukam przepisów oraz obliczam koszty składników...
+          </TextBit>
+        </Flex>
+      )}
+      <Button
+        onClick={handleClick}
+        variant="solid-inverted"
+        disabled={loading}
+        loading={loading}
+      >
         Wylosuj nowe przepisy
       </Button>
     </Flex>

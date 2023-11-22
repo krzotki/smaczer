@@ -4,13 +4,19 @@ import { dbName, dbUrl } from "./config";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { RandomLCG } from "@/utils/random";
+import { OpenAI } from "openai";
+import {
+  getIngredientsPrice,
+  ingredientsToString,
+  updateRecipe,
+} from "./addRecipe";
 
 const MAX_PAGE_SIZE = 21;
 export const COLLECTION_ALL_RECIPES = "recipes";
 
 export type RecipeListItem = Pick<
   RecipeType,
-  "_id" | "id" | "name" | "photoPath"
+  "_id" | "id" | "name" | "photoPath" | "ingredientsCost"
 >;
 
 export const getAllRecipes = (collection: string) => {
@@ -121,10 +127,7 @@ export const getRecipesBySimilarity = async (
   const recipes = await getAllRecipes(COLLECTION_ALL_RECIPES);
   const vectorStore = await MemoryVectorStore.fromTexts(
     recipes.map((recipe, index) => {
-      const text = `${recipe.name}
-        ${recipe.ingredients
-          .map(({ items }) => items.map((item) => item.name).join(","))
-          .join(",")}`;
+      const text = ingredientsToString(recipe);
       if (index === 0) console.log({ text });
       return text;
     }),
@@ -146,8 +149,10 @@ export const getRecipesBySimilarity = async (
   const averageScore =
     resultTwo.reduce((prev, [, score]) => prev + score, 0) / resultTwo.length;
   console.log({ averageScore });
-  return resultTwo
+  const selected = resultTwo
     .filter(([, score]) => score > averageScore)
     .slice(0, count - 1)
     .map(([document, score]) => document.metadata) as RecipeListItem[];
+
+  return selected;
 };

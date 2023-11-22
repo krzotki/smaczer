@@ -9,6 +9,7 @@ import { Box, Flex, Headline, TextBit } from "brainly-style-guide";
 
 export default async function Home() {
   const recipes = await getAllRecipes(COLLECTION_WEEKLY_RECIPES);
+
   return (
     <AppLayout header={<Header />}>
       <Flex marginTop="m" marginBottom="m" justifyContent="center">
