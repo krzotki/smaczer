@@ -7,6 +7,8 @@ import { getAllRecipes } from "@/recipes/getRecipes";
 import { COLLECTION_WEEKLY_RECIPES } from "@/recipes/rollRecipes";
 import { Box, Flex, Headline, TextBit } from "brainly-style-guide";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const recipes = await getAllRecipes(COLLECTION_WEEKLY_RECIPES);
 
