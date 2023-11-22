@@ -6,20 +6,21 @@ import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { RandomLCG } from "@/utils/random";
 
 const MAX_PAGE_SIZE = 21;
+export const COLLECTION_ALL_RECIPES = "recipes";
 
 export type RecipeListItem = Pick<
   RecipeType,
   "_id" | "id" | "name" | "photoPath"
 >;
 
-export const getAllRecipes = () => {
+export const getAllRecipes = (collection: string) => {
   return new Promise<RecipeType[]>((resolve, reject) => {
     MongoClient.connect(dbUrl)
       .then((client) => {
         const db = client.db(dbName);
 
         // Read Data from a Collection
-        db.collection("recipes")
+        db.collection(collection)
           .find({})
           .toArray()
           .then((items) => {
@@ -49,7 +50,7 @@ export const getRecipes = (page: number) => {
         const db = client.db(dbName);
 
         // Read Data from a Collection
-        db.collection("recipes")
+        db.collection(COLLECTION_ALL_RECIPES)
           .find({})
           .sort({
             _id: 1,
@@ -86,7 +87,7 @@ export const getRecipe = (id: string) => {
         const db = client.db(dbName);
 
         // Read Data from a Collection
-        db.collection("recipes")
+        db.collection(COLLECTION_ALL_RECIPES)
           .findOne({
             _id: new ObjectId(id),
           })
@@ -100,11 +101,11 @@ export const getRecipe = (id: string) => {
             } else {
               reject("Recipe not found");
             }
-            client.close(); // Close the connection after the operation is complete
+            client.close();
           })
           .catch((error) => {
             reject(error);
-            client.close(); // Also close the connection in case of an error
+            client.close();
           });
       })
       .catch((error) => {
@@ -113,37 +114,20 @@ export const getRecipe = (id: string) => {
   });
 };
 
-const WEEK = 1000 * 60 * 60 * 24 * 7;
-export const gerRandomRecipesForWeek = async (
-  count: number
-): Promise<RecipeListItem[]> => {
-  const recipes = await getAllRecipes();
-
-  const seed = Math.floor(Date.now() / WEEK);
-
-  const rng = new RandomLCG(seed);
-
-  return rng.pickRandomElements(recipes, count);
-};
-
-export const getRecipesByIngredients = async (
+export const getRecipesBySimilarity = async (
   ingredients: string,
   count: number
 ) => {
-  const recipes = await getAllRecipes();
-
+  const recipes = await getAllRecipes(COLLECTION_ALL_RECIPES);
   const vectorStore = await MemoryVectorStore.fromTexts(
-    recipes.map(
-      (recipe) =>
-        `
-      ${recipe.name}
-      ${JSON.stringify(
-        recipe.ingredients.map(({ items }) =>
-          items.map((item) => item.name).join(",")
-        )
-      )}
-      `
-    ),
+    recipes.map((recipe, index) => {
+      const text = `${recipe.name}
+        ${recipe.ingredients
+          .map(({ items }) => items.map((item) => item.name).join(","))
+          .join(",")}`;
+      if (index === 0) console.log({ text });
+      return text;
+    }),
     recipes.map((recipe) => ({
       _id: recipe._id.toString(),
       id: recipe.id,
@@ -156,10 +140,14 @@ export const getRecipesByIngredients = async (
   // const resultOne = await vectorStore.similaritySearch(ingredients, count);
   const resultTwo = await vectorStore.similaritySearchWithScore(
     ingredients,
-    count
+    count * 2
   );
 
-  return resultTwo.map(
-    ([document, score]) => document.metadata
-  ) as RecipeListItem[];
+  const averageScore =
+    resultTwo.reduce((prev, [, score]) => prev + score, 0) / resultTwo.length;
+  console.log({ averageScore });
+  return resultTwo
+    .filter(([, score]) => score > averageScore)
+    .slice(0, count - 1)
+    .map(([document, score]) => document.metadata) as RecipeListItem[];
 };

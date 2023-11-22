@@ -13,12 +13,23 @@ export class RandomLCG {
     return this.seed / this.m;
   }
 
-  public pickRandomElements<T>(array: T[], count: number): T[] {
+  public pickRandomElements<T extends { _id: any }>(
+    array: T[],
+    count: number
+  ): T[] {
     const result: T[] = [];
-    for (let i = 0; i < count; i++) {
+    const pickedIds = new Set();
+
+    while (result.length < count) {
       const index = Math.floor(this.random() * array.length);
-      result.push(array[index]);
+      const element = array[index];
+
+      if (!pickedIds.has(element._id)) {
+        pickedIds.add(element._id);
+        result.push(element);
+      }
     }
+
     return result;
   }
 }

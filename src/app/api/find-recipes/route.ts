@@ -1,5 +1,5 @@
 import { addRecipeFromUrl } from "@/recipes/addRecipe";
-import { getRecipesByIngredients } from "@/recipes/getRecipes";
+import { getRecipesBySimilarity } from "@/recipes/getRecipes";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -7,7 +7,7 @@ export async function GET(request: Request) {
   const count = searchParams.get("count");
 
   try {
-    const result = await getRecipesByIngredients(
+    const result = await getRecipesBySimilarity(
       String(ingredients),
       Number(count)
     );

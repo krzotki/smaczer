@@ -1,6 +1,6 @@
 import { AddRecipeButton } from "@/components/AddRecipeButton";
 import { RecipesList } from "@/components/RecipesList";
-import { getRecipesByIngredients } from "@/recipes/getRecipes";
+import { getRecipesBySimilarity } from "@/recipes/getRecipes";
 import React, { Suspense } from "react";
 import Loading from "./loading";
 import { AppLayout } from "@/components/AppLayout";
@@ -13,7 +13,7 @@ export default async function Recipes({
   params: { ingredients: string };
 }) {
   const parsedIngredients = decodeURIComponent(params.ingredients);
-  const recipes = await getRecipesByIngredients(parsedIngredients || "", 8);
+  const recipes = await getRecipesBySimilarity(parsedIngredients || "", 15);
 
   return (
     <Suspense fallback={<Loading />}>

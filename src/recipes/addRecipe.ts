@@ -3,6 +3,7 @@ import { RecipeType } from "./types";
 import { dbName, dbUrl } from "./config";
 import axios from "axios";
 import cheerio from "cheerio";
+import { COLLECTION_ALL_RECIPES } from "./getRecipes";
 
 export const addRecipeFromUrl = (url: string) => {
   return new Promise<InsertOneResult>(async (resolve, reject) => {
@@ -29,7 +30,7 @@ export const addRecipeFromUrl = (url: string) => {
         const db = client.db(dbName);
 
         // Read Data from a Collection
-        db.collection("recipes")
+        db.collection(COLLECTION_ALL_RECIPES)
           .insertOne({
             ...recipe,
             _id: new ObjectId(recipe.id),

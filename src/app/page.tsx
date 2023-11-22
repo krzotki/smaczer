@@ -2,11 +2,13 @@ import { AddRecipeButton } from "@/components/AddRecipeButton";
 import { AppLayout } from "@/components/AppLayout";
 import { Header } from "@/components/Header";
 import { RecipesList } from "@/components/RecipesList";
-import { gerRandomRecipesForWeek } from "@/recipes/getRecipes";
+import { RollWeeklyRecipesButton } from "@/components/RollWeeklyRecipesButton";
+import { getAllRecipes } from "@/recipes/getRecipes";
+import { COLLECTION_WEEKLY_RECIPES } from "@/recipes/rollRecipes";
 import { Box, Flex, Headline, TextBit } from "brainly-style-guide";
 
 export default async function Home() {
-  const recipes = await gerRandomRecipesForWeek(9);
+  const recipes = await getAllRecipes(COLLECTION_WEEKLY_RECIPES);
   return (
     <AppLayout header={<Header />}>
       <Flex marginTop="m" marginBottom="m" justifyContent="center">
@@ -17,6 +19,7 @@ export default async function Home() {
         </Box>
       </Flex>
       <RecipesList recipes={recipes} />
+      <RollWeeklyRecipesButton />
       <AddRecipeButton />
     </AppLayout>
   );
