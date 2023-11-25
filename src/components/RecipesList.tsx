@@ -19,6 +19,22 @@ import { SearchForm } from "./SearchForm";
 
 const MAX_NAME_LENGTH = 30;
 
+export const getCostColor = (cost: number) => {
+  if (cost < 20) {
+    return "green-40";
+  }
+
+  if (cost < 30) {
+    return "yellow-40";
+  }
+
+  return "red-40";
+};
+
+export const transformCost = (cost: string) => {
+  return `${Number(cost.trim()).toFixed(2).toString()} zł`;
+};
+
 export const RecipesList = ({
   recipes,
   page,
@@ -26,7 +42,7 @@ export const RecipesList = ({
   recipes: RecipeListItem[];
   page?: number;
 }) => {
-
+  console.log({recipes})
   return (
     <>
       {page ? (
@@ -36,7 +52,7 @@ export const RecipesList = ({
           alignItems="center"
           marginTop="m"
           className={css.header}
-          marginBottom='m'
+          marginBottom="m"
         >
           {page > 1 ? (
             <Link href={`./${page - 1}`}>
@@ -67,6 +83,9 @@ export const RecipesList = ({
         className={css.list}
       >
         {recipes.map((recipe) => {
+          const cost = (recipe.ingredientsCost || "").split("TOTAL_COST=")[1];
+          const color = cost ? getCostColor(Number(cost)) : "gray-40";
+
           return (
             <Flex
               marginBottom="l"
@@ -79,7 +98,7 @@ export const RecipesList = ({
                 href={`/recipe/${recipe._id}` + (page ? `?page=${page}` : "")}
                 className={css.link}
               >
-                <Box shadow className={css.grayBackground}>
+                <Box shadow className={css.boxBackground}>
                   <Flex
                     direction={["column", "row", "row"]}
                     alignItems="center"
@@ -98,12 +117,25 @@ export const RecipesList = ({
                     <Flex
                       marginLeft={["none", "m", "m"]}
                       marginTop={["s", "none"]}
+                      direction={["row", "column"]}
+                      fullWidth
+                      fullHeight
+                      justifyContent="space-between"
                     >
-                      <Headline color="text-white" size="small">
-                        {recipe.name.length > MAX_NAME_LENGTH
-                          ? `${recipe.name.slice(0, MAX_NAME_LENGTH - 3)}...`
-                          : recipe.name}
-                      </Headline>
+                      <Flex marginTop='s' fullWidth>
+                        <Headline color="text-white" size="small">
+                          {recipe.name.length > MAX_NAME_LENGTH
+                            ? `${recipe.name.slice(0, MAX_NAME_LENGTH - 3)}...`
+                            : recipe.name}
+                        </Headline>
+                      </Flex>
+                      <Flex marginBottom="s" fullWidth>
+                        <Box padding="xs" color={color}>
+                          <Text weight='bold' color="text-black" align="to-center">
+                            {cost ? transformCost(cost) : "???"}
+                          </Text>
+                        </Box>
+                      </Flex>
                     </Flex>
                   </Flex>
                 </Box>

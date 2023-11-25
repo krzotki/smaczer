@@ -74,6 +74,7 @@ export const getRecipes = (page: number) => {
                 id: item.id,
                 name: item.name,
                 photoPath: item.photoPath,
+                ingredientsCost: item.ingredientsCost,
               }))
             );
             client.close(); // Close the connection after the operation is complete
@@ -163,5 +164,19 @@ export const getRecipesBySimilarity = async (
 
   const selected = await vectorStore.similaritySearch(ingredients, count);
 
-  return selected.map((doc) => doc.metadata as RecipeListItem);
+  const withCost = await Promise.all(
+    selected.map(async (doc) => {
+      const recipe = doc.metadata as RecipeListItem;
+      if (recipe.ingredientsCost) {
+        return recipe;
+      }
+      const fullRecipe = await getRecipe(recipe._id);
+      return {
+        ...recipe,
+        ingredientsCost: fullRecipe.ingredientsCost,
+      };
+    })
+  );
+
+  return withCost;
 };

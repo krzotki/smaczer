@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import {
+  Accordion,
+  AccordionItem,
   Box,
   Button,
   Flex,
@@ -11,13 +13,24 @@ import {
   List,
   ListItem,
   ListItemIcon,
+  Popover,
   Text,
   TextBit,
+  Tooltip,
 } from "brainly-style-guide";
 import React from "react";
 import css from "./Recipe.module.scss";
 import { RecipeType } from "@/recipes/types";
 import { useRouter, useSearchParams } from "next/navigation";
+import { getCostColor, transformCost } from "./RecipesList";
+
+export const getCostDescription = (cost: string) => {
+  const lines = cost.split("\n");
+  lines.pop();
+  lines.pop();
+  return lines.join("\n");
+};
+
 export const Recipe = ({ recipe }: { recipe: RecipeType }) => {
   const searchParams = useSearchParams();
 
@@ -30,7 +43,11 @@ export const Recipe = ({ recipe }: { recipe: RecipeType }) => {
   }, [searchParams]);
 
   const { back } = useRouter();
-  console.log({recipe})
+  console.log({ recipe });
+
+  const cost = (recipe.ingredientsCost || "").split("TOTAL_COST=")[1];
+  const color = cost ? getCostColor(Number(cost)) : "gray-40";
+
   return (
     <Flex alignItems="center" direction="column" className={css.container}>
       <Box padding="m">
@@ -90,6 +107,43 @@ export const Recipe = ({ recipe }: { recipe: RecipeType }) => {
               ))
             )}
           </List>
+          {recipe.ingredientsCost && (
+            <Flex fullWidth marginTop="s" justifyContent="stretch">
+              <Accordion className={css.accordion}>
+                <AccordionItem
+                  padding="xs"
+                  id="accordion-item-1"
+                  title={
+                    <Flex
+                      fullWidth
+                      justifyContent="flex-start"
+                      className="sg-space-x-m"
+                      alignItems="center"
+                    >
+                      <Text>Przybliżony całkowity koszt </Text>
+                      <Flex>
+                        <Box padding="xs" color={color} shadow>
+                          <Text
+                            weight="bold"
+                            color="text-black"
+                            align="to-center"
+                          >
+                            {cost ? transformCost(cost) : "???"}
+                          </Text>
+                        </Box>
+                      </Flex>
+                    </Flex>
+                  }
+                >
+                  <Flex>
+                    <Text size="small" color="text-black">
+                      {getCostDescription(recipe.ingredientsCost)}
+                    </Text>
+                  </Flex>
+                </AccordionItem>
+              </Accordion>
+            </Flex>
+          )}
         </Flex>
       </Box>
       <Box border noBorderRadius className={css.steps}>

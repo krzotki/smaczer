@@ -6,9 +6,11 @@
   box-sizing: border-box;
 }
 
-.grayBackground {
+.boxBackground {
   background-color: #191919 !important;
+  height: 100%;
 }
+
 .image {
   border-radius: 4px;
   max-width: 90%;
