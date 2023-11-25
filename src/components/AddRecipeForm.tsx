@@ -2,24 +2,28 @@
 
 import { Box, Button, Flex, Input } from "brainly-style-guide";
 import React from "react";
-import { useRouter } from 'next/navigation'
- 
+import { useRouter } from "next/navigation";
 
 export const AddRecipeForm = () => {
   const [url, setUrl] = React.useState();
 
   const [error, setError] = React.useState<string>();
-  const router = useRouter()
- 
+  const router = useRouter();
+
+  const [loading, setLoading] = React.useState(false);
+
   const sendRecipe = React.useCallback(
     async (evt) => {
       evt.preventDefault();
+      setLoading(true);
       const response = await fetch("/api/add-recipe-from-url", {
         method: "post",
         body: JSON.stringify({
           url,
         }),
       });
+
+      setLoading(false);
 
       const data = await response.json();
 
@@ -28,8 +32,8 @@ export const AddRecipeForm = () => {
         return;
       }
 
-      if(data.insertedId) {
-        router.push(`/recipe/${data.insertedId}`, { scroll: false })
+      if (data.insertedId) {
+        router.push(`/recipe/${data.insertedId}`, { scroll: false });
       }
     },
     [url]
@@ -50,9 +54,15 @@ export const AddRecipeForm = () => {
               onChange={handleInputChange}
               errorMessage={error}
               invalid={!!error}
+              disabled={loading}
             />
           </Flex>
-          <Button type="submit" variant="outline-inverted">
+          <Button
+            type="submit"
+            variant="outline-inverted"
+            disabled={loading}
+            loading={loading}
+          >
             Add recipe
           </Button>
         </Flex>

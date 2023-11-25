@@ -1,6 +1,6 @@
 import { MongoClient, ObjectId } from "mongodb";
 import { RecipeType } from "./types";
-import { dbName, dbUrl } from "./config";
+import { dbName, dbUrl, pineconeIndex } from "./config";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { RandomLCG } from "@/utils/random";
@@ -123,30 +123,27 @@ export const getRecipe = (id: string) => {
   });
 };
 
-// Instantiate a new Pinecone client, which will automatically read the
-// env vars: PINECONE_API_KEY and PINECONE_ENVIRONMENT which come from
-// the Pinecone dashboard at https://app.pinecone.io
-const pinecone = new Pinecone();
+export const createDocumentsFromRecipes = (recipes: RecipeType[]) =>
+  recipes.map(
+    (recipe) =>
+      new Document({
+        pageContent: `
+        ${recipe.name}
+        ${ingredientsToString(recipe)}
+      `,
+        metadata: {
+          _id: recipe._id.toString(),
+          id: recipe.id,
+          name: recipe.name,
+          photoPath: recipe.photoPath,
+        },
+      })
+  );
 
-const pineconeIndex = pinecone.Index(process.env.PINECONE_INDEX || "smaczer");
 export const indexRecipes = async () => {
   const recipes = await getAllRecipes(COLLECTION_ALL_RECIPES);
   return await PineconeStore.fromDocuments(
-    recipes.map(
-      (recipe) =>
-        new Document({
-          pageContent: `
-            ${recipe.name}
-            ${ingredientsToString(recipe)}
-          `,
-          metadata: {
-            _id: recipe._id.toString(),
-            id: recipe.id,
-            name: recipe.name,
-            photoPath: recipe.photoPath,
-          },
-        })
-    ),
+    createDocumentsFromRecipes(recipes),
     new OpenAIEmbeddings(),
     {
       pineconeIndex,

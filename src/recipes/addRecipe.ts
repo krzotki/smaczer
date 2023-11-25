@@ -1,9 +1,12 @@
 import { InsertOneResult, MongoClient, ObjectId } from "mongodb";
 import { RecipeType } from "./types";
-import { dbName, dbUrl } from "./config";
+import { dbName, dbUrl, pineconeStore } from "./config";
 import axios from "axios";
 import cheerio from "cheerio";
-import { COLLECTION_ALL_RECIPES } from "./getRecipes";
+import {
+  COLLECTION_ALL_RECIPES,
+  createDocumentsFromRecipes,
+} from "./getRecipes";
 import OpenAI from "openai";
 
 const openAIClient = new OpenAI({
@@ -101,9 +104,26 @@ export const addRecipeFromUrl = (url: string) => {
       return;
     }
 
+    console.log({ recipe });
+
     const ingredientsCost = await getIngredientsPrice(
       ingredientsToString(recipe)
     );
+
+    console.log({ ingredientsCost });
+    
+    const _id = new ObjectId(recipe.id);
+    const fullRecipe = {
+      ...recipe,
+      _id: _id.toString(),
+      ingredientsCost,
+    };
+
+    const indexRes = await pineconeStore.addDocuments(
+      createDocumentsFromRecipes([fullRecipe])
+    );
+
+    console.log({ indexRes });
 
     MongoClient.connect(dbUrl)
       .then((client) => {
@@ -111,11 +131,7 @@ export const addRecipeFromUrl = (url: string) => {
 
         // Read Data from a Collection
         db.collection(COLLECTION_ALL_RECIPES)
-          .insertOne({
-            ...recipe,
-            _id: new ObjectId(recipe.id),
-            ingredientsCost,
-          })
+          .insertOne({ ...fullRecipe, _id })
           .then((result) => {
             resolve(result);
             client.close(); // Close the connection after the operation is complete
