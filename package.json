@@ -10,6 +10,7 @@
     "redeploy": "git fetch && git rebase && docker compose down && docker compose up -d --build"
   },
   "dependencies": {
+    "@pinecone-database/pinecone": "^1.1.2",
     "axios": "^1.6.2",
     "brainly-style-guide": "^225.8.0",
     "cheerio": "^1.0.0-rc.12",

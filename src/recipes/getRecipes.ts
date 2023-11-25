@@ -10,6 +10,9 @@ import {
   ingredientsToString,
   updateRecipe,
 } from "./addRecipe";
+import { Pinecone } from "@pinecone-database/pinecone";
+import { Document } from "langchain/document";
+import { PineconeStore } from "langchain/vectorstores/pinecone";
 
 const MAX_PAGE_SIZE = 21;
 export const COLLECTION_ALL_RECIPES = "recipes";
@@ -120,39 +123,48 @@ export const getRecipe = (id: string) => {
   });
 };
 
+// Instantiate a new Pinecone client, which will automatically read the
+// env vars: PINECONE_API_KEY and PINECONE_ENVIRONMENT which come from
+// the Pinecone dashboard at https://app.pinecone.io
+const pinecone = new Pinecone();
+
+const pineconeIndex = pinecone.Index(process.env.PINECONE_INDEX || "smaczer");
+export const indexRecipes = async () => {
+  const recipes = await getAllRecipes(COLLECTION_ALL_RECIPES);
+  return await PineconeStore.fromDocuments(
+    recipes.map(
+      (recipe) =>
+        new Document({
+          pageContent: `
+            ${recipe.name}
+            ${ingredientsToString(recipe)}
+          `,
+          metadata: {
+            _id: recipe._id.toString(),
+            id: recipe.id,
+            name: recipe.name,
+            photoPath: recipe.photoPath,
+          },
+        })
+    ),
+    new OpenAIEmbeddings(),
+    {
+      pineconeIndex,
+      maxConcurrency: 5, // Maximum number of batch requests to allow at once. Each batch is 1000 vectors.
+    }
+  );
+};
+
 export const getRecipesBySimilarity = async (
   ingredients: string,
   count: number
-) => {
-  const recipes = await getAllRecipes(COLLECTION_ALL_RECIPES);
-  const vectorStore = await MemoryVectorStore.fromTexts(
-    recipes.map((recipe, index) => {
-      const text = ingredientsToString(recipe);
-      if (index === 0) console.log({ text });
-      return text;
-    }),
-    recipes.map((recipe) => ({
-      _id: recipe._id.toString(),
-      id: recipe.id,
-      name: recipe.name,
-      photoPath: recipe.photoPath,
-    })),
-    new OpenAIEmbeddings()
+): Promise<RecipeListItem[]> => {
+  const vectorStore = await PineconeStore.fromExistingIndex(
+    new OpenAIEmbeddings(),
+    { pineconeIndex }
   );
 
-  // const resultOne = await vectorStore.similaritySearch(ingredients, count);
-  const resultTwo = await vectorStore.similaritySearchWithScore(
-    ingredients,
-    count * 2
-  );
+  const selected = await vectorStore.similaritySearch(ingredients, count);
 
-  const averageScore =
-    resultTwo.reduce((prev, [, score]) => prev + score, 0) / resultTwo.length;
-  console.log({ averageScore });
-  const selected = resultTwo
-    .filter(([, score]) => score > averageScore)
-    .slice(0, count - 1)
-    .map(([document, score]) => document.metadata) as RecipeListItem[];
-
-  return selected;
+  return selected.map((doc) => doc.metadata as RecipeListItem);
 };

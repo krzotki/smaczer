@@ -13,7 +13,7 @@ export default async function Recipes({
   params: { ingredients: string };
 }) {
   const parsedIngredients = decodeURIComponent(params.ingredients);
-  const recipes = await getRecipesBySimilarity(parsedIngredients || "", 6);
+  const recipes = await getRecipesBySimilarity(parsedIngredients || "", 20);
 
   return (
     <Suspense fallback={<Loading />}>
