@@ -1,6 +1,6 @@
 import { MongoClient, ObjectId } from "mongodb";
 import { RecipeType } from "./types";
-import { dbName, getDbUrl, pineconeIndex } from "./config";
+import { dbName, dbUrl, pineconeIndex } from "./config";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { RandomLCG } from "@/utils/random";
@@ -24,7 +24,7 @@ export type RecipeListItem = Pick<
 
 export const getAllRecipes = (collection: string) => {
   return new Promise<RecipeType[]>((resolve, reject) => {
-    MongoClient.connect(getDbUrl())
+    MongoClient.connect(dbUrl)
       .then((client) => {
         const db = client.db(dbName);
 
@@ -54,7 +54,7 @@ export const getAllRecipes = (collection: string) => {
 
 export const getRecipes = (page: number) => {
   return new Promise<RecipeListItem[]>((resolve, reject) => {
-    MongoClient.connect(getDbUrl())
+    MongoClient.connect(dbUrl)
       .then((client) => {
         const db = client.db(dbName);
 
@@ -92,7 +92,7 @@ export const getRecipes = (page: number) => {
 
 export const getRecipe = (id: string) => {
   return new Promise<RecipeType>((resolve, reject) => {
-    MongoClient.connect(getDbUrl())
+    MongoClient.connect(dbUrl)
       .then((client) => {
         const db = client.db(dbName);
 
