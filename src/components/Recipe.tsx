@@ -22,7 +22,7 @@ import React from "react";
 import css from "./Recipe.module.scss";
 import { RecipeType } from "@/recipes/types";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getCostColor, transformCost } from "./RecipesList";
+import { CostLabel } from "./CostLabel";
 
 export const getCostDescription = (cost: string) => {
   const lines = cost.split("\n");
@@ -44,9 +44,6 @@ export const Recipe = ({ recipe }: { recipe: RecipeType }) => {
 
   const { back } = useRouter();
   console.log({ recipe });
-
-  const cost = (recipe.ingredientsCost || "").split("TOTAL_COST=")[1];
-  const color = cost ? getCostColor(Number(cost)) : "gray-40";
 
   return (
     <Flex alignItems="center" direction="column" className={css.container}>
@@ -122,15 +119,7 @@ export const Recipe = ({ recipe }: { recipe: RecipeType }) => {
                     >
                       <Text>Przybliżony całkowity koszt </Text>
                       <Flex>
-                        <Box padding="xs" color={color} shadow>
-                          <Text
-                            weight="bold"
-                            color="text-black"
-                            align="to-center"
-                          >
-                            {cost ? transformCost(cost) : "???"}
-                          </Text>
-                        </Box>
+                        <CostLabel recipe={recipe} />
                       </Flex>
                     </Flex>
                   }

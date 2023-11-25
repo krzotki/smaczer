@@ -16,24 +16,9 @@ import React from "react";
 import { RecipeListItem } from "@/recipes/getRecipes";
 import css from "./RecipesList.module.scss";
 import { SearchForm } from "./SearchForm";
+import { CostLabel } from "./CostLabel";
 
 const MAX_NAME_LENGTH = 30;
-
-export const getCostColor = (cost: number) => {
-  if (cost < 20) {
-    return "green-40";
-  }
-
-  if (cost < 30) {
-    return "yellow-40";
-  }
-
-  return "red-40";
-};
-
-export const transformCost = (cost: string) => {
-  return `${Number(cost.trim()).toFixed(2).toString()} zł`;
-};
 
 export const RecipesList = ({
   recipes,
@@ -42,37 +27,34 @@ export const RecipesList = ({
   recipes: RecipeListItem[];
   page?: number;
 }) => {
-  console.log({recipes})
+  console.log({ recipes });
   return (
     <>
       {page ? (
-        <Flex
-          justifyContent="space-evenly"
-          fullWidth
-          alignItems="center"
-          marginTop="m"
-          className={css.header}
-          marginBottom="m"
-        >
-          {page > 1 ? (
-            <Link href={`./${page - 1}`}>
-              <Button variant="outline-inverted">
-                <Icon size={24} color="icon-white" type="arrow_left" />
-              </Button>
-            </Link>
-          ) : (
-            <Button disabled variant="outline-inverted">
-              <Icon size={24} color="icon-white" type="arrow_left" />
-            </Button>
-          )}
-          <TextBit size={["small"]} color="text-white">
-            Strona {page}
-          </TextBit>
-          <Link href={`./${page + 1}`}>
-            <Button variant="outline-inverted">
-              <Icon size={24} color="icon-white" type="arrow_right" />
-            </Button>
-          </Link>
+        <Flex className={css.header} marginTop="m" marginBottom="m" fullWidth>
+          <Box padding={["s"]}>
+            <Flex justifyContent="space-evenly" fullWidth alignItems="center">
+              {page > 1 ? (
+                <Link href={`./${page - 1}`}>
+                  <Button variant="outline-inverted">
+                    <Icon size={24} color="icon-white" type="arrow_left" />
+                  </Button>
+                </Link>
+              ) : (
+                <Button disabled variant="outline-inverted">
+                  <Icon size={24} color="icon-white" type="arrow_left" />
+                </Button>
+              )}
+              <TextBit size={["small"]} color="text-white">
+                Strona {page}
+              </TextBit>
+              <Link href={`./${page + 1}`}>
+                <Button variant="outline-inverted">
+                  <Icon size={24} color="icon-white" type="arrow_right" />
+                </Button>
+              </Link>
+            </Flex>
+          </Box>
         </Flex>
       ) : null}
       <Flex
@@ -83,9 +65,6 @@ export const RecipesList = ({
         className={css.list}
       >
         {recipes.map((recipe) => {
-          const cost = (recipe.ingredientsCost || "").split("TOTAL_COST=")[1];
-          const color = cost ? getCostColor(Number(cost)) : "gray-40";
-
           return (
             <Flex
               marginBottom="l"
@@ -108,8 +87,8 @@ export const RecipesList = ({
                     <Image
                       src={recipe.photoPath}
                       alt={recipe.name}
-                      width={250}
-                      height={165}
+                      width={275}
+                      height={182}
                       priority
                       className={css.image}
                     />
@@ -121,20 +100,22 @@ export const RecipesList = ({
                       fullWidth
                       fullHeight
                       justifyContent="space-between"
+                      alignItems="center"
                     >
-                      <Flex marginTop='s' fullWidth>
+                      <Flex marginTop={["none", "s"]} fullWidth>
                         <Headline color="text-white" size="small">
                           {recipe.name.length > MAX_NAME_LENGTH
                             ? `${recipe.name.slice(0, MAX_NAME_LENGTH - 3)}...`
                             : recipe.name}
                         </Headline>
                       </Flex>
-                      <Flex marginBottom="s" fullWidth>
-                        <Box padding="xs" color={color}>
-                          <Text weight='bold' color="text-black" align="to-center">
-                            {cost ? transformCost(cost) : "???"}
-                          </Text>
-                        </Box>
+                      <Flex
+                        marginBottom={["none", "s"]}
+                        marginLeft={["xs", "none"]}
+                        fullWidth={[false, true]}
+                        alignItems="flex-start"
+                      >
+                        <CostLabel recipe={recipe} />
                       </Flex>
                     </Flex>
                   </Flex>

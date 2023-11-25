@@ -15,7 +15,7 @@ export default async function Home() {
   return (
     <AppLayout header={<Header />}>
       <Flex marginTop="m" marginBottom="m" justifyContent="center">
-        <Box padding="xs">
+        <Box padding="m">
           <TextBit color="text-white" size={["small"]}>
             Pomysły na ten tydzień
           </TextBit>

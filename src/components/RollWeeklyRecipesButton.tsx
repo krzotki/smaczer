@@ -22,7 +22,7 @@ export const RollWeeklyRecipesButton = () => {
     <Flex
       fullWidth
       justifyContent="center"
-      marginTop="m"
+      marginBottom="l"
       direction="column"
       alignItems="center"
     >
