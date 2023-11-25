@@ -9,7 +9,7 @@ export const RollWeeklyRecipesButton = () => {
   const [loading, setLoading] = React.useState(false);
   const handleClick = React.useCallback(async () => {
     setLoading(true);
-    const res = await fetch("/api/roll-recipes");
+    const res = await fetch("/api/roll-recipes", { method: "post" });
     const data = await res.json();
     console.log({ data });
     setLoading(false);

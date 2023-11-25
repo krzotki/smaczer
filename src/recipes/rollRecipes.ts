@@ -1,6 +1,6 @@
-import { MongoClient, ObjectId, OptionalId, WithId } from "mongodb";
+import { MongoClient,} from "mongodb";
 import { dbName, getDbUrl } from "./config";
-import { RandomLCG } from "@/utils/random";
+
 import { COLLECTION_ALL_RECIPES } from "./getRecipes";
 import { RecipeType } from "./types";
 import {
@@ -11,7 +11,6 @@ import {
 
 export const COLLECTION_WEEKLY_RECIPES = "recipes_weekly";
 
-const rng = new RandomLCG(Date.now());
 
 export const rollWeeklyRecipes = () => {
   return new Promise((resolve, reject) => {
