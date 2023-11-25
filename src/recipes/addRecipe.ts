@@ -1,6 +1,6 @@
 import { InsertOneResult, MongoClient, ObjectId } from "mongodb";
 import { RecipeType } from "./types";
-import { dbName, dbUrl, pineconeStore } from "./config";
+import { dbName, getDbUrl, pineconeStore } from "./config";
 import axios from "axios";
 import cheerio from "cheerio";
 import {
@@ -112,7 +112,7 @@ export const addRecipeFromUrl = (url: string) => {
     );
 
     console.log({ ingredientsCost });
-    
+
     const _id = new ObjectId(recipe.id);
     const fullRecipe = {
       ...recipe,
@@ -126,7 +126,7 @@ export const addRecipeFromUrl = (url: string) => {
 
     console.log({ indexRes });
 
-    MongoClient.connect(dbUrl)
+    MongoClient.connect(getDbUrl())
       .then((client) => {
         const db = client.db(dbName);
 
@@ -153,7 +153,7 @@ export const updateRecipe = (
   recipe: Partial<RecipeType>
 ) => {
   return new Promise(async (resolve, reject) => {
-    MongoClient.connect(dbUrl)
+    MongoClient.connect(getDbUrl())
       .then((client) => {
         const db = client.db(dbName);
 

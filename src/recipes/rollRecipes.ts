@@ -1,5 +1,5 @@
 import { MongoClient, ObjectId, OptionalId, WithId } from "mongodb";
-import { dbName, dbUrl } from "./config";
+import { dbName, getDbUrl } from "./config";
 import { RandomLCG } from "@/utils/random";
 import { COLLECTION_ALL_RECIPES } from "./getRecipes";
 import { RecipeType } from "./types";
@@ -15,7 +15,7 @@ const rng = new RandomLCG(Date.now());
 
 export const rollWeeklyRecipes = () => {
   return new Promise((resolve, reject) => {
-    MongoClient.connect(dbUrl)
+    MongoClient.connect(getDbUrl())
       .then((client) => {
         console.log("Connected");
         const db = client.db(dbName);
