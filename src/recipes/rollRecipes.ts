@@ -18,7 +18,9 @@ export const rollWeeklyRecipes = () => {
     MongoClient.connect(dbUrl)
       .then(async (client) => {
         const db = client.db(dbName);
-
+        console.log('Connected')
+        client.close()
+        return
         const collections = await db.listCollections().toArray();
         const collectionNames = collections.map((c) => c.name);
         const collectionName = COLLECTION_WEEKLY_RECIPES;
@@ -75,7 +77,7 @@ export const rollWeeklyRecipes = () => {
                 }
               );
 
-              console.log({updateRes})
+            console.log({ updateRes })
 
             return {
               ...recipe,
