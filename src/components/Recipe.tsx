@@ -43,7 +43,6 @@ export const Recipe = ({ recipe }: { recipe: RecipeType }) => {
   }, [searchParams]);
 
   const { back } = useRouter();
-  console.log({ recipe });
 
   return (
     <Flex alignItems="center" direction="column" className={css.container}>

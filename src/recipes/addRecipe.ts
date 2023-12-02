@@ -105,19 +105,10 @@ export const addRecipeFromUrl = (url: string) => {
       return;
     }
 
-    console.log({ recipe });
-
-    const ingredientsCost = await getIngredientsPrice(
-      ingredientsToString(recipe)
-    );
-
-    console.log({ ingredientsCost });
-
     const _id = new ObjectId(recipe.id);
     const fullRecipe = {
       ...recipe,
       _id: _id.toString(),
-      ingredientsCost,
     };
 
     const indexRes = await pineconeStore.addDocuments(
@@ -134,8 +125,20 @@ export const addRecipeFromUrl = (url: string) => {
         db.collection(COLLECTION_ALL_RECIPES)
           .insertOne({ ...fullRecipe, _id })
           .then((result) => {
-            resolve(result);
             client.close(); // Close the connection after the operation is complete
+
+            getIngredientsPrice(ingredientsToString(recipe)).then(
+              async (ingredientsCost) => {
+                console.log({ ingredientsCost });
+                const updateRes = await updateRecipe(COLLECTION_ALL_RECIPES, {
+                  ...fullRecipe,
+                  ingredientsCost,
+                });
+                console.log({updateRes})
+              }
+            );
+
+            resolve(result);
           })
           .catch((error) => {
             reject(error);
@@ -156,7 +159,7 @@ export const updateRecipe = (
     MongoClient.connect(dbUrl)
       .then((client) => {
         const db = client.db(dbName);
-
+        const {_id, ...rest} = recipe
         // Read Data from a Collection
         db.collection(collection)
           .updateOne(
@@ -165,7 +168,7 @@ export const updateRecipe = (
             },
             {
               $set: {
-                ...recipe,
+                ...rest,
               },
             }
           )

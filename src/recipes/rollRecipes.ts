@@ -53,40 +53,27 @@ export const rollWeeklyRecipes = () => {
         );
 
         const randomRecipes = rng.pickRandomElements(recipes, 10);
-        const withCost = await Promise.all(
-          randomRecipes.map(async (recipe) => {
-            console.log({ recipe });
-            if (recipe.ingredientsCost) {
-              return recipe;
-            }
 
-            const cost = await getIngredientsPrice(ingredientsToString(recipe));
-
-            const updateRes = await db
-              .collection(COLLECTION_ALL_RECIPES)
-              .updateOne(
-                {
-                  _id: new ObjectId(recipe._id),
-                },
-                {
-                  $set: {
-                    ingredientsCost: cost,
-                  },
-                }
-              );
-
-              console.log({updateRes})
-
-            return {
-              ...recipe,
-              ingredientsCost: cost,
-            };
-          })
-        );
+        randomRecipes.forEach(async (recipe) => {
+          if (!recipe.ingredientsCost) {
+            getIngredientsPrice(ingredientsToString(recipe)).then(
+              async (cost) => {
+                await updateRecipe(COLLECTION_ALL_RECIPES, {
+                  ...recipe,
+                  ingredientsCost: cost,
+                });
+                await updateRecipe(COLLECTION_WEEKLY_RECIPES, {
+                  ...recipe,
+                  ingredientsCost: cost,
+                });
+              }
+            );
+          }
+        });
 
         db.collection(collectionName)
           .insertMany(
-            withCost.map((recipe) => ({
+            randomRecipes.map((recipe) => ({
               ...recipe,
               _id: new ObjectId(recipe._id),
             }))

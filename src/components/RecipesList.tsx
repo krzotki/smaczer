@@ -27,7 +27,7 @@ export const RecipesList = ({
   recipes: RecipeListItem[];
   page?: number;
 }) => {
-  console.log({ recipes });
+
   return (
     <>
       {page ? (

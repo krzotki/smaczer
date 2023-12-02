@@ -11,7 +11,7 @@ export const RollWeeklyRecipesButton = () => {
     setLoading(true);
     const res = await fetch("/api/roll-recipes", { method: "post" });
     const data = await res.json();
-    console.log({ data });
+
     setLoading(false);
     if (data.acknowledged) {
       refresh();
