@@ -10,6 +10,8 @@ import {
   Box,
   Icon,
   TextBit,
+  SeparatorHorizontal,
+  Tooltip,
 } from "brainly-style-guide";
 import Link from "next/link";
 import React from "react";
@@ -17,16 +19,96 @@ import { RecipeListItem } from "@/recipes/getRecipes";
 import css from "./RecipesList.module.scss";
 import { SearchForm } from "./SearchForm";
 import { CostLabel } from "./CostLabel";
+import { usePathname, useRouter } from "next/navigation";
+import { revalidatePage } from "@/utils/revalidatePage";
 
 const MAX_NAME_LENGTH = 30;
 
 export const RecipesList = ({
   recipes,
   page,
+  weeklyRecipes,
 }: {
   recipes: RecipeListItem[];
   page?: number;
+  weeklyRecipes?: boolean;
 }) => {
+  const { refresh } = useRouter();
+  const currentPath = usePathname();
+  const [loading, setLoading] = React.useState(false);
+
+  const handleRemove = React.useCallback(
+    async (_id: string) => {
+      setLoading(true);
+      const res = await fetch("/api/remove-recipe", {
+        method: "post",
+        body: JSON.stringify({
+          type: "weekly",
+          _id,
+        }),
+      });
+      const data = await res.json();
+
+      setLoading(false);
+      if (data.acknowledged) {
+        revalidatePage(currentPath);
+      }
+    },
+    [refresh]
+  );
+
+  const handleAdd = React.useCallback(
+    async (_id: string) => {
+      setLoading(true);
+      const res = await fetch("/api/add-recipe-to-weekly", {
+        method: "post",
+        body: JSON.stringify({
+          _id,
+        }),
+      });
+      const data = await res.json();
+
+      setLoading(false);
+      if (data.acknowledged) {
+        revalidatePage("/");
+        revalidatePage(currentPath);
+      }
+    },
+    [refresh, currentPath]
+  );
+  const getOption = (recipe: RecipeListItem) => {
+    if (weeklyRecipes || recipe.isInWeekly) {
+      return (
+        <Tooltip>
+          <Tooltip.Element label="Usuń z przepisów tygodnia" />
+          <Tooltip.Trigger>
+            <Button
+              iconOnly
+              aria-label="remove recipe"
+              icon={<Icon color="icon-gray-50" type="trash" />}
+              variant="transparent"
+              onClick={() => handleRemove(recipe._id)}
+            />
+          </Tooltip.Trigger>
+        </Tooltip>
+      );
+    }
+
+    return (
+      <Tooltip>
+        <Tooltip.Element label="Dodaj do przepisów tygodnia" />
+        <Tooltip.Trigger>
+          <Button
+            iconOnly
+            aria-label="add recipe"
+            icon={<Icon color="icon-gray-50" type="add_more" />}
+            variant="transparent"
+            onClick={() => handleAdd(recipe._id)}
+          />
+        </Tooltip.Trigger>
+      </Tooltip>
+    );
+  };
 
   return (
     <>
@@ -57,70 +139,47 @@ export const RecipesList = ({
           </Box>
         </Flex>
       ) : null}
+
       <Flex
-        direction={["column", "column", "row"]}
         wrap
         alignItems="center"
-        justifyContent="space-between"
+        justifyContent="space-evenly"
         className={css.list}
       >
         {recipes.map((recipe) => {
           return (
             <Flex
-              marginBottom="l"
-              marginLeft={["none", "s"]}
-              marginRight={["none", "s"]}
               className={css.box}
+              direction="column"
+              marginRight="s"
+              marginLeft="s"
+              marginBottom="m"
               key={recipe._id}
             >
               <Link
                 href={`/recipe/${recipe._id}` + (page ? `?page=${page}` : "")}
-                className={css.link}
               >
-                <Box shadow className={css.boxBackground}>
-                  <Flex
-                    direction={["column", "row", "row"]}
-                    alignItems="center"
-                    fullHeight
-                    fullWidth
-                  >
-                    <Image
-                      src={recipe.photoPath}
-                      alt={recipe.name}
-                      width={275}
-                      height={182}
-                      priority
-                      className={css.image}
-                    />
-
-                    <Flex
-                      marginLeft={["none", "m", "m"]}
-                      marginTop={["s", "none"]}
-                      direction={["row", "column"]}
-                      fullWidth
-                      fullHeight
-                      justifyContent="space-between"
-                      alignItems="center"
-                    >
-                      <Flex marginTop={["none", "s"]} fullWidth>
-                        <Headline color="text-white" size="small">
-                          {recipe.name.length > MAX_NAME_LENGTH
-                            ? `${recipe.name.slice(0, MAX_NAME_LENGTH - 3)}...`
-                            : recipe.name}
-                        </Headline>
-                      </Flex>
-                      <Flex
-                        marginBottom={["none", "s"]}
-                        marginLeft={["xs", "none"]}
-                        fullWidth={[false, true]}
-                        alignItems="flex-start"
-                      >
-                        <CostLabel recipe={recipe} />
-                      </Flex>
-                    </Flex>
-                  </Flex>
-                </Box>
+                <Image
+                  src={recipe.photoPath}
+                  alt={recipe.name}
+                  width={275}
+                  height={182}
+                  priority
+                  className={css.image}
+                />
+                <Flex marginTop="s" marginBottom="s">
+                  <Headline color="text-white" size="small">
+                    {recipe.name.length > MAX_NAME_LENGTH
+                      ? `${recipe.name.slice(0, MAX_NAME_LENGTH - 3)}...`
+                      : recipe.name}
+                  </Headline>
+                </Flex>
               </Link>
+              <SeparatorHorizontal color="gray-50" />
+              <Flex marginTop="s" justifyContent="space-between">
+                <CostLabel recipe={recipe} />
+                {getOption(recipe)}
+              </Flex>
             </Flex>
           );
         })}

@@ -21,7 +21,7 @@ export default async function Home() {
           </TextBit>
         </Box>
       </Flex>
-      <RecipesList recipes={recipes} />
+      <RecipesList recipes={recipes} weeklyRecipes/>
       <RollWeeklyRecipesButton />
       <AddRecipeButton />
     </AppLayout>

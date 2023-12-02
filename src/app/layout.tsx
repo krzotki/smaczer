@@ -2,9 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
-import { AddRecipeButton } from "@/components/AddRecipeButton";
-import { SearchForm } from "@/components/SearchForm";
-import { AppLayout } from "@/components/AppLayout";
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,6 +24,8 @@ export default function RootLayout({
           rel="stylesheet"
         />
         <Script src="https://styleguide.brainly.com/images/icons-f71af3176e.js" />
+        <Script src="https://styleguide.brainly.com/images/subjects-icons-b0f96b6e0b.js" />
+        <Script src="https://styleguide.brainly.com/images/subjects-mono-icons-0fe77c49f4.js" />
         {children}
       </body>
     </html>

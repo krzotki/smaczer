@@ -14,6 +14,7 @@ import {
   ListItem,
   ListItemIcon,
   Popover,
+  SubjectIcon,
   Text,
   TextBit,
   Tooltip,
@@ -21,8 +22,9 @@ import {
 import React from "react";
 import css from "./Recipe.module.scss";
 import { RecipeType } from "@/recipes/types";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { CostLabel } from "./CostLabel";
+import { revalidatePage } from "@/utils/revalidatePage";
 
 export const getCostDescription = (cost: string) => {
   const lines = cost.split("\n");
@@ -33,7 +35,7 @@ export const getCostDescription = (cost: string) => {
 
 export const Recipe = ({ recipe }: { recipe: RecipeType }) => {
   const searchParams = useSearchParams();
-
+  const currentPath = usePathname();
   const page = React.useMemo(() => {
     try {
       return Number(searchParams.get("page"));
@@ -43,6 +45,25 @@ export const Recipe = ({ recipe }: { recipe: RecipeType }) => {
   }, [searchParams]);
 
   const { back } = useRouter();
+
+  const [loading, setLoading] = React.useState(false);
+
+  const recalculateCost = React.useCallback(async () => {
+    setLoading(true);
+    const res = await fetch("/api/recalculate-cost", {
+      method: "post",
+      body: JSON.stringify({
+        _id: recipe._id,
+      }),
+    });
+    const data = await res.json();
+
+    setLoading(false);
+    if (data.success) {
+      revalidatePage(currentPath);
+      revalidatePage('/');
+    }
+  }, [recipe, currentPath]);
 
   return (
     <Flex alignItems="center" direction="column" className={css.container}>
@@ -123,10 +144,22 @@ export const Recipe = ({ recipe }: { recipe: RecipeType }) => {
                     </Flex>
                   }
                 >
-                  <Flex>
+                  <Flex
+                    direction="column"
+                    alignItems="flex-start"
+                    className="sg-space-y-m"
+                  >
                     <Text size="small" color="text-black">
                       {getCostDescription(recipe.ingredientsCost)}
                     </Text>
+                    <Button
+                      loading={loading}
+                      disabled={loading}
+                      onClick={recalculateCost}
+                      icon={<SubjectIcon monoColor='icon-white' size="small" type="mathematics" />}
+                    >
+                      Oblicz ponownie
+                    </Button>
                   </Flex>
                 </AccordionItem>
               </Accordion>

@@ -1,33 +1,28 @@
+@import "~brainly-style-guide/src/sass/config";
+@import "~brainly-style-guide/src/sass/mixins";
+
 .box {
-  max-width: 100%;
-  width: 450px;
-  height: 275px;
-  max-height: 275px;
-  box-sizing: border-box;
-}
-
-.boxBackground {
-  background-color: #191919 !important;
-  height: 100%;
-}
-
-.image {
-  border-radius: 4px;
-  max-width: 90%;
-  height: auto;
+  background-color: #191919;
+  padding: spacing(s);
+  border-radius: spacing(s);
 }
 
 .header {
   position: sticky;
   top: 0;
   background-color: black !important;
+  z-index: 1;
 }
 
 .list {
   max-width: min(1500px, 90%);
 }
 
-.link {
-  width: 100%;
-  height: 100%;
+.image {
+  transition: all 0.1s ease-in;
+  border-radius: spacing(s) / 2;
+  &:hover {
+    border-radius: spacing(s);
+    transform: translateY(-8px) scale(1.1);
+  }
 }

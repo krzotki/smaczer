@@ -6,8 +6,10 @@ import cheerio from "cheerio";
 import {
   COLLECTION_ALL_RECIPES,
   createDocumentsFromRecipes,
+  getRecipe,
 } from "./getRecipes";
 import OpenAI from "openai";
+import { COLLECTION_WEEKLY_RECIPES } from "./rollRecipes";
 
 const openAIClient = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -55,16 +57,17 @@ export const ingredientsToString = (recipe: RecipeType) =>
     .join("\n");
 
 export const getIngredientsPrice = async (ingredients: string) => {
+  console.log("CALCULATING INGREDIENTS PRICE");
   const response = await openAIClient.chat.completions.create({
     // model: "gpt-4-vision-preview",
     // model: "gpt-4",
     model: "gpt-4-1106-preview",
     temperature: 0.7,
-    max_tokens: 4096,
+    max_tokens: 1024,
     messages: [
       {
         role: "system",
-        content: `Calculate the total cost in Polish złoty for the following ingredients, considering average prices in Poland, and return the total price as a single number in the TOTAL_COST field .
+        content: `Calculate the total cost in Polish złoty for the following ingredients, considering average prices in Poland, and return the total price as a single number in the TOTAL_COST field. Show only calculations without much of description.
           Example:
           ${exampleIngredients}
 
@@ -81,7 +84,7 @@ export const getIngredientsPrice = async (ingredients: string) => {
     frequency_penalty: 0,
     presence_penalty: 0.6,
   });
-
+  console.log("FINISHED CALCULATING INGREDIENTS PRICE");
   return response.choices[0].message.content;
 };
 
@@ -134,7 +137,7 @@ export const addRecipeFromUrl = (url: string) => {
                   ...fullRecipe,
                   ingredientsCost,
                 });
-                console.log({updateRes})
+                console.log({ updateRes });
               }
             );
 
@@ -151,6 +154,75 @@ export const addRecipeFromUrl = (url: string) => {
   });
 };
 
+export const recalculateCost = (_id: string) => {
+  return new Promise<{ success: boolean }>(async (resolve, reject) => {
+    const recipe = await getRecipe(_id);
+
+    try {
+      const ingredientsCost = await getIngredientsPrice(
+        ingredientsToString(recipe)
+      );
+
+      await updateRecipe(COLLECTION_ALL_RECIPES, {
+        _id,
+        ingredientsCost,
+      });
+      await updateRecipe(COLLECTION_WEEKLY_RECIPES, {
+        _id,
+        ingredientsCost,
+      });
+      resolve({
+        success: true,
+      });
+    } catch (e) {
+      resolve({
+        success: false,
+      });
+    }
+  });
+};
+
+export const addRecipeToWeekly = (_id: string) => {
+  return new Promise<InsertOneResult>(async (resolve, reject) => {
+    const recipe = await getRecipe(_id);
+
+    MongoClient.connect(dbUrl)
+      .then((client) => {
+        const db = client.db(dbName);
+
+        db.collection(COLLECTION_WEEKLY_RECIPES)
+          .insertOne({ ...recipe, _id: new ObjectId(_id) })
+          .then((result) => {
+            client.close();
+
+            if (!recipe.ingredientsCost) {
+              getIngredientsPrice(ingredientsToString(recipe)).then(
+                async (ingredientsCost) => {
+                  await updateRecipe(COLLECTION_ALL_RECIPES, {
+                    _id,
+                    ingredientsCost,
+                  });
+                  await updateRecipe(COLLECTION_WEEKLY_RECIPES, {
+                    _id,
+                    ingredientsCost,
+                  });
+                }
+              );
+            }
+
+            resolve(result);
+          })
+          .catch((error) => {
+            reject(error);
+            client.close();
+          });
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+};
+
 export const updateRecipe = (
   collection: string,
   recipe: Partial<RecipeType>
@@ -159,7 +231,7 @@ export const updateRecipe = (
     MongoClient.connect(dbUrl)
       .then((client) => {
         const db = client.db(dbName);
-        const {_id, ...rest} = recipe
+        const { _id, ...rest } = recipe;
         // Read Data from a Collection
         db.collection(collection)
           .updateOne(

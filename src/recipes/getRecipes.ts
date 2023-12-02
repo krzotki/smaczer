@@ -13,6 +13,7 @@ import {
 import { Pinecone } from "@pinecone-database/pinecone";
 import { Document } from "langchain/document";
 import { PineconeStore } from "langchain/vectorstores/pinecone";
+import { COLLECTION_WEEKLY_RECIPES } from "./rollRecipes";
 
 const MAX_PAGE_SIZE = 21;
 export const COLLECTION_ALL_RECIPES = "recipes";
@@ -20,7 +21,9 @@ export const COLLECTION_ALL_RECIPES = "recipes";
 export type RecipeListItem = Pick<
   RecipeType,
   "_id" | "id" | "name" | "photoPath" | "ingredientsCost"
->;
+> & {
+  isInWeekly?: boolean;
+};
 
 export const getAllRecipes = (collection: string) => {
   return new Promise<RecipeType[]>((resolve, reject) => {
@@ -55,8 +58,10 @@ export const getAllRecipes = (collection: string) => {
 export const getRecipes = (page: number) => {
   return new Promise<RecipeListItem[]>((resolve, reject) => {
     MongoClient.connect(dbUrl)
-      .then((client) => {
+      .then(async (client) => {
         const db = client.db(dbName);
+
+        const weekly = await getAllRecipes(COLLECTION_WEEKLY_RECIPES);
 
         // Read Data from a Collection
         db.collection(COLLECTION_ALL_RECIPES)
@@ -75,6 +80,9 @@ export const getRecipes = (page: number) => {
                 name: item.name,
                 photoPath: item.photoPath,
                 ingredientsCost: item.ingredientsCost,
+                isInWeekly: !!weekly.find(
+                  (recipe) => recipe._id === item._id.toString()
+                ),
               }))
             );
             client.close(); // Close the connection after the operation is complete
@@ -90,7 +98,7 @@ export const getRecipes = (page: number) => {
   });
 };
 
-export const getRecipe = (id: string) => {
+export const getRecipe = (_id: string) => {
   return new Promise<RecipeType>((resolve, reject) => {
     MongoClient.connect(dbUrl)
       .then((client) => {
@@ -99,7 +107,7 @@ export const getRecipe = (id: string) => {
         // Read Data from a Collection
         db.collection(COLLECTION_ALL_RECIPES)
           .findOne({
-            _id: new ObjectId(id),
+            _id: new ObjectId(_id),
           })
           .then((item) => {
             if (item) {
