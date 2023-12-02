@@ -36,7 +36,7 @@ export const AddRecipeForm = () => {
         router.push(`/recipe/${data.insertedId}`, { scroll: false });
       }
     },
-    [url]
+    [url, router]
   );
 
   const handleInputChange = React.useCallback((evt) => {

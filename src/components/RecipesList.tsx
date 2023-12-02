@@ -54,7 +54,7 @@ export const RecipesList = ({
         revalidatePage(currentPath);
       }
     },
-    [refresh]
+    [currentPath]
   );
 
   const handleAdd = React.useCallback(
@@ -74,7 +74,7 @@ export const RecipesList = ({
         revalidatePage(currentPath);
       }
     },
-    [refresh, currentPath]
+    [currentPath]
   );
   const getOption = (recipe: RecipeListItem) => {
     if (weeklyRecipes || recipe.isInWeekly) {

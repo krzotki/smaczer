@@ -25,7 +25,7 @@ export const SearchForm = ({
         router.push(`/search/${ingredients}`, { scroll: false });
       }
     },
-    [ingredients]
+    [ingredients, router]
   );
 
   const handleInputChange = React.useCallback((evt) => {
