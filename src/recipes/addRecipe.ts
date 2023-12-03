@@ -1,6 +1,6 @@
 import { InsertOneResult, MongoClient, ObjectId } from "mongodb";
 import { RecipeType } from "./types";
-import { dbName, dbUrl, pineconeStore } from "./config";
+import { dbName, dbUrl, openAIClient, pineconeStore } from "./config";
 import axios from "axios";
 import cheerio from "cheerio";
 import {
@@ -10,10 +10,6 @@ import {
 } from "./getRecipes";
 import OpenAI from "openai";
 import { COLLECTION_WEEKLY_RECIPES } from "./rollRecipes";
-
-const openAIClient = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 const exampleIngredients = `
 1/4 główki młodej kapusty

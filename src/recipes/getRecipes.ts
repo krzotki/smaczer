@@ -61,6 +61,17 @@ export const getRecipes = (page: number) => {
       .then(async (client) => {
         const db = client.db(dbName);
 
+        const collections = await db.listCollections().toArray();
+        const collectionNames = collections.map((c) => c.name);
+
+        if (!collectionNames.includes(COLLECTION_ALL_RECIPES)) {
+          await db.createCollection(COLLECTION_ALL_RECIPES);
+        }
+
+        if (!collectionNames.includes(COLLECTION_WEEKLY_RECIPES)) {
+          await db.createCollection(COLLECTION_WEEKLY_RECIPES);
+        }
+
         const weekly = await getAllRecipes(COLLECTION_WEEKLY_RECIPES);
 
         // Read Data from a Collection
