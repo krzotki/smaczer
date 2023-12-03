@@ -1,6 +1,14 @@
 "use client";
 
-import { Button, Flex, Link, TextBit, Tooltip } from "brainly-style-guide";
+import {
+  Button,
+  Flex,
+  Icon,
+  TextBit,
+  Tooltip,
+  Text,
+} from "brainly-style-guide";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
 
@@ -52,7 +60,10 @@ export const ExportShoppingListButton = () => {
           color="text-green-40"
           href="https://docs.google.com/spreadsheets/d/1-JiwaI8l943B6Wbqh4yCVRLPMqh2wwOc38hr2t1EG-I/edit#gid=0"
         >
-          Lista zakupów
+          <Flex className="sg-space-x-xs">
+            <Text color="text-white">Lista zakupów</Text>
+            <Icon type="arrow_top_right" />
+          </Flex>
         </Link>
       </Flex>
     </Flex>

@@ -23,12 +23,7 @@ export default async function Home() {
         </Box>
       </Flex>
       <RecipesList recipes={recipes} weeklyRecipes />
-      <Flex
-        fullWidth
-        justifyContent="center"
-        direction={["column", "row"]}
-        alignItems={["center", "flex-start"]}
-      >
+      <Flex fullWidth justifyContent="center" direction={["column", "row"]} alignItems={['center', 'flex-start']}>
         <ExportShoppingListButton />
         <RollWeeklyRecipesButton />
       </Flex>
