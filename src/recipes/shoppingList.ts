@@ -60,10 +60,10 @@ const schema = {
   },
 } as const;
 
-type SchemaType = FromSchema<typeof schema>;
+export type SchemaType = FromSchema<typeof schema>;
 
 async function classifyProducts(ingredients: string) {
-  const prompt = `Zwróć listę wszystkich podanych produktów, przypisując je do odpowiednich kategorii: ${ingredients}`;
+  const prompt = `Zwróć listę wszystkich podanych produktów, przypisując je do odpowiednich kategorii, zachowując maksymalną długość znaków (40): ${ingredients}`;
 
   const completion = await openAIClient.chat.completions.create({
     // model: "gpt-3.5-turbo-0613",
