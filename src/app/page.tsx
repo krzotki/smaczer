@@ -1,5 +1,6 @@
 import { AddRecipeButton } from "@/components/AddRecipeButton";
 import { AppLayout } from "@/components/AppLayout";
+import { ExportShoppingListButton } from "@/components/ExportShoppingListButton";
 import { Header } from "@/components/Header";
 import { RecipesList } from "@/components/RecipesList";
 import { RollWeeklyRecipesButton } from "@/components/RollWeeklyRecipesButton";
@@ -21,8 +22,16 @@ export default async function Home() {
           </TextBit>
         </Box>
       </Flex>
-      <RecipesList recipes={recipes} weeklyRecipes/>
-      <RollWeeklyRecipesButton />
+      <RecipesList recipes={recipes} weeklyRecipes />
+      <Flex
+        fullWidth
+        justifyContent="center"
+        direction={["column", "row"]}
+        alignItems={["center", "flex-start"]}
+      >
+        <ExportShoppingListButton />
+        <RollWeeklyRecipesButton />
+      </Flex>
       <AddRecipeButton />
     </AppLayout>
   );

@@ -1,11 +1,11 @@
 "use client";
 
+import { revalidatePage } from "@/utils/revalidatePage";
 import { Button, Flex, TextBit, Tooltip } from "brainly-style-guide";
 import { useRouter } from "next/navigation";
 import React from "react";
 
 export const RollWeeklyRecipesButton = () => {
-  const { refresh } = useRouter();
   const [loading, setLoading] = React.useState(false);
   const handleClick = React.useCallback(async () => {
     setLoading(true);
@@ -14,17 +14,16 @@ export const RollWeeklyRecipesButton = () => {
 
     setLoading(false);
     if (data.acknowledged) {
-      refresh();
+      revalidatePage("/");
     }
-  }, [refresh]);
+  }, []);
 
   return (
     <Flex
-      fullWidth
       justifyContent="center"
-      marginBottom="l"
       direction="column"
       alignItems="center"
+      margin='m'
     >
       {loading && (
         <Flex marginBottom="m">
@@ -35,7 +34,7 @@ export const RollWeeklyRecipesButton = () => {
       )}
       <Button
         onClick={handleClick}
-        variant="solid-inverted"
+        variant="outline-inverted"
         disabled={loading}
         loading={loading}
       >

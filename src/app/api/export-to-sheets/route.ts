@@ -61,7 +61,7 @@ export async function GET(request: Request) {
         row.push(arr[i] || "");
       });
 
-      sheetData.push(row); // Add an empty row for spacing between categories
+      sheetData.push(row); 
     }
 
     const request = {

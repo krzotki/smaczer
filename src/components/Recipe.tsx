@@ -44,7 +44,7 @@ export const Recipe = ({ recipe }: { recipe: RecipeType }) => {
     }
   }, [searchParams]);
 
-  const { back } = useRouter();
+  const { back, push } = useRouter();
 
   const [loading, setLoading] = React.useState(false);
 
@@ -61,7 +61,7 @@ export const Recipe = ({ recipe }: { recipe: RecipeType }) => {
     setLoading(false);
     if (data.success) {
       revalidatePage(currentPath);
-      revalidatePage('/');
+      revalidatePage("/");
     }
   }, [recipe, currentPath]);
 
@@ -76,7 +76,7 @@ export const Recipe = ({ recipe }: { recipe: RecipeType }) => {
               </Button>
             </Link>
           ) : (
-            <Button variant="outline-inverted" onClick={back}>
+            <Button variant="outline-inverted" onClick={() => push("/")}>
               <Icon size={32} color="icon-white" type="arrow_left" />
             </Button>
           )}
@@ -156,7 +156,13 @@ export const Recipe = ({ recipe }: { recipe: RecipeType }) => {
                       loading={loading}
                       disabled={loading}
                       onClick={recalculateCost}
-                      icon={<SubjectIcon monoColor='icon-white' size="small" type="mathematics" />}
+                      icon={
+                        <SubjectIcon
+                          monoColor="icon-white"
+                          size="small"
+                          type="mathematics"
+                        />
+                      }
                     >
                       Oblicz ponownie
                     </Button>
