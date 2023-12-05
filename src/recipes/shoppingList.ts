@@ -67,7 +67,7 @@ async function classifyProducts(ingredients: string) {
 
   const completion = await openAIClient.chat.completions.create({
     // model: "gpt-3.5-turbo-0613",
-    model: "gpt-4-0613",
+    model: "gpt-4-1106-preview",
     messages: [
       {
         role: "system",
