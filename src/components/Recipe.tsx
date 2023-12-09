@@ -36,15 +36,20 @@ export const getCostDescription = (cost: string) => {
 export const Recipe = ({ recipe }: { recipe: RecipeType }) => {
   const searchParams = useSearchParams();
   const currentPath = usePathname();
-  const page = React.useMemo(() => {
-    try {
-      return Number(searchParams.get("page"));
-    } catch {
-      return undefined;
-    }
+
+  const referer = React.useMemo(() => {
+    return searchParams.get("referer") || undefined;
   }, [searchParams]);
 
   const { back, push } = useRouter();
+
+  const handleLinkClick = React.useCallback(
+    (evt) => {
+      evt.preventDefault();
+      back();
+    },
+    [back]
+  );
 
   const [loading, setLoading] = React.useState(false);
 
@@ -69,8 +74,8 @@ export const Recipe = ({ recipe }: { recipe: RecipeType }) => {
     <Flex alignItems="center" direction="column" className={css.container}>
       <Box padding="m">
         <Flex alignItems="center">
-          {page ? (
-            <Link href={`/recipes/${page}`}>
+          {referer ? (
+            <Link onClick={handleLinkClick} href={referer}>
               <Button variant="outline-inverted">
                 <Icon size={32} color="icon-white" type="arrow_left" />
               </Button>

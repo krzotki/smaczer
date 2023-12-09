@@ -63,7 +63,7 @@ const schema = {
 export type SchemaType = FromSchema<typeof schema>;
 
 async function classifyProducts(ingredients: string) {
-  const prompt = `Zwróć listę wszystkich podanych produktów, przypisując je do odpowiednich kategorii, zachowując maksymalną długość znaków (40): ${ingredients}`;
+  const prompt = `Zwróć listę wszystkich podanych produktów, przypisując je do odpowiednich kategorii, zachowując maksymalną długość znaków (30): ${ingredients}`;
 
   const completion = await openAIClient.chat.completions.create({
     // model: "gpt-3.5-turbo-0613",
@@ -89,8 +89,9 @@ async function sumProducts(ingredients: string) {
   Przykłady:
   - kurczak 300g + pierś z kurczaka 500g + 1 większy filet z kurczaka = 1100g kurczka (zakładając że 1 większy filet/pierś z kurczaka to 300g)
   - 1 jajko + 3 jajka + 1 większe jajko = 5 jajka
+  - 2 papryki + 1 czerwona papryka = 3 papryki
   Nie uogólniaj składników na siłę (np. kapusta pekińska a biała kapusta to różne produkty).
-  Zwróc wynik w postaci listy, nie pomijając ŻADNEGO składnika - to ważne.
+  Zwróc wynik w postaci listy, nie pomijając ŻADNEGO składnika - to ważne (można pominąć sól, pieprz, woda).
  
   Składniki: ${ingredients}`;
 

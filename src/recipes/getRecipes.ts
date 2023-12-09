@@ -181,21 +181,30 @@ export const getRecipesBySimilarity = async (
     { pineconeIndex }
   );
 
+  const weekly = await getAllRecipes(COLLECTION_WEEKLY_RECIPES);
   const selected = await vectorStore.similaritySearch(ingredients, count);
 
-  const withCost = await Promise.all(
+  const withData = await Promise.all(
     selected.map(async (doc) => {
       const recipe = doc.metadata as RecipeListItem;
+      const isInWeekly = !!weekly.find(
+        (r) => r._id === recipe._id.toString()
+      );
+
       if (recipe.ingredientsCost) {
-        return recipe;
+        return {
+          ...recipe,
+          isInWeekly
+        };
       }
       const fullRecipe = await getRecipe(recipe._id);
       return {
         ...recipe,
         ingredientsCost: fullRecipe.ingredientsCost,
+        isInWeekly
       };
     })
   );
 
-  return withCost;
+  return withData;
 };

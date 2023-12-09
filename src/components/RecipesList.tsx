@@ -19,7 +19,7 @@ import { RecipeListItem } from "@/recipes/getRecipes";
 import css from "./RecipesList.module.scss";
 import { SearchForm } from "./SearchForm";
 import { CostLabel } from "./CostLabel";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { revalidatePage } from "@/utils/revalidatePage";
 
 const MAX_NAME_LENGTH = 30;
@@ -35,11 +35,12 @@ export const RecipesList = ({
 }) => {
   const { refresh } = useRouter();
   const currentPath = usePathname();
-  const [loading, setLoading] = React.useState(false);
+  const [loading, setLoading] = React.useState<string | undefined>(undefined);
+  const query = useSearchParams();
 
   const handleRemove = React.useCallback(
     async (_id: string) => {
-      setLoading(true);
+      setLoading(_id);
       const res = await fetch("/api/remove-recipe", {
         method: "post",
         body: JSON.stringify({
@@ -49,7 +50,7 @@ export const RecipesList = ({
       });
       const data = await res.json();
 
-      setLoading(false);
+      setLoading(undefined);
       if (data.acknowledged) {
         revalidatePage(currentPath);
       }
@@ -59,7 +60,7 @@ export const RecipesList = ({
 
   const handleAdd = React.useCallback(
     async (_id: string) => {
-      setLoading(true);
+      setLoading(_id);
       const res = await fetch("/api/add-recipe-to-weekly", {
         method: "post",
         body: JSON.stringify({
@@ -68,7 +69,7 @@ export const RecipesList = ({
       });
       const data = await res.json();
 
-      setLoading(false);
+      setLoading(undefined);
       if (data.acknowledged) {
         revalidatePage("/");
         revalidatePage(currentPath);
@@ -87,6 +88,7 @@ export const RecipesList = ({
               aria-label="remove recipe"
               icon={<Icon color="icon-gray-50" type="trash" />}
               variant="transparent"
+              loading={recipe._id === loading}
               onClick={() => handleRemove(recipe._id)}
             />
           </Tooltip.Trigger>
@@ -103,6 +105,7 @@ export const RecipesList = ({
             aria-label="add recipe"
             icon={<Icon color="icon-gray-50" type="add_more" />}
             variant="transparent"
+            loading={recipe._id === loading}
             onClick={() => handleAdd(recipe._id)}
           />
         </Tooltip.Trigger>
@@ -156,9 +159,7 @@ export const RecipesList = ({
               marginBottom="m"
               key={recipe._id}
             >
-              <Link
-                href={`/recipe/${recipe._id}` + (page ? `?page=${page}` : "")}
-              >
+              <Link href={`/recipe/${recipe._id}?referer=${currentPath}`}>
                 <Image
                   src={recipe.photoPath}
                   alt={recipe.name}
