@@ -21,6 +21,7 @@ import { SearchForm } from "./SearchForm";
 import { CostLabel } from "./CostLabel";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { revalidatePage } from "@/utils/revalidatePage";
+import { RecipeRollOne } from "./RecipeRollOne";
 
 const MAX_NAME_LENGTH = 30;
 
@@ -184,6 +185,7 @@ export const RecipesList = ({
             </Flex>
           );
         })}
+        {weeklyRecipes && <RecipeRollOne />}
       </Flex>
     </>
   );
