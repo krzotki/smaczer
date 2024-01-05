@@ -66,8 +66,8 @@ async function classifyProducts(ingredients: string) {
   const prompt = `Zwróć listę wszystkich podanych produktów, przypisując je do odpowiednich kategorii, zachowując maksymalną długość znaków (30): ${ingredients}`;
 
   const completion = await openAIClient.chat.completions.create({
-    // model: "gpt-3.5-turbo-0613",
-    model: "gpt-4",
+    // model: "gpt-3.5-turbo-1106",
+    model: "gpt-4-1106-preview",
     messages: [
       {
         role: "system",
@@ -77,6 +77,7 @@ async function classifyProducts(ingredients: string) {
     ],
     functions: [{ name: "set_recipe", parameters: schema }],
     function_call: { name: "set_recipe" },
+    temperature: 0,
   });
 
   const args = completion.choices[0].message.function_call?.arguments || "{}";
@@ -84,19 +85,28 @@ async function classifyProducts(ingredients: string) {
   return args;
 }
 
-async function sumProducts(ingredients: string) {
+async function sumProducts(currentIngredients: string, newIngredients: string) {
   const prompt = `Zsumuj ilości podanych składników. 
   Przykłady:
   - kurczak 300g + pierś z kurczaka 500g + 1 większy filet z kurczaka = 1100g kurczka (zakładając że 1 większy filet/pierś z kurczaka to 300g)
   - 1 jajko + 3 jajka + 1 większe jajko = 5 jajka
   - 2 papryki + 1 czerwona papryka = 3 papryki
+  Jeśli składniki zawierają różne jednostki, przyjmij ilość "na oko". Na przykład plaster sera - 20g, łyżka mąki - 10g.
+  NIE PROŚ o dokładniejsze jednostki!
+  Jeśli jednostka nie została podana, załóż że chodzi i jedną sztukę tego składnika. Na przykład Sałata to 1 główka Sałaty.
   Nie uogólniaj składników na siłę (np. kapusta pekińska a biała kapusta to różne produkty).
-  Zwróc wynik w postaci listy, nie pomijając ŻADNEGO składnika - to ważne (można pominąć sól, pieprz, woda).
- 
-  Składniki: ${ingredients}`;
+  Zwróć wynik w postaci listy (pomiń składniki takie jak sól, pieprz, woda, cukier jeśli ich ilości są wystarczająco małe (szczypta albo łyżka)).
+  Wyjściowa ilość elementów (składników) nie powinna być krótsza niż ilość elementów wejściowych.
+  Zwróc tylko i wyłącznie już zsumowane składniki.
 
+  Obecne składniki:
+   ${currentIngredients}
+   
+  Dodaj te składniki do obecnych:
+  ${newIngredients} 
+   `;
   const completion = await openAIClient.chat.completions.create({
-    // model: "gpt-3.5-turbo-0613",
+    // model: "gpt-3.5-turbo-1106",
     model: "gpt-4-1106-preview",
     messages: [
       {
@@ -105,6 +115,7 @@ async function sumProducts(ingredients: string) {
       },
       { role: "user", content: prompt },
     ],
+    temperature: 0,
   });
 
   const summed = completion.choices[0].message.content;
@@ -118,9 +129,17 @@ const testSummed =
 export const createShoppingList = async () => {
   const recipes = await getAllRecipes(COLLECTION_WEEKLY_RECIPES);
 
-  const ingredients = recipes.map(ingredientsToString).join("\n");
+  const ingredients = recipes.map(ingredientsToString);
 
-  const summed = await sumProducts(ingredients);
+  let summed = ingredients[0];
+
+  for (let i = 1; i < ingredients.length; i++) {
+    console.log({ summed, recipe: recipes[i].name });
+    summed = await sumProducts(summed, ingredients[i]);
+  }
+
+  console.log("FINAL SUMMED", { summed });
+
   const classified = await classifyProducts(summed);
   const parsed = JSON.parse(classified) as SchemaType;
   return { classified, summed, parsed };
