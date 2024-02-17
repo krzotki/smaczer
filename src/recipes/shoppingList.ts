@@ -26,7 +26,7 @@ const schema = {
       type: "array",
       items: itemSchema,
       description:
-        "Lista składników warzywnych, takich jak ziemniaki, cebula, pomidory, czosnek, itd.",
+        "Lista składników warzywnych, owoców oraz świerzych ziół, takich jak ziemniaki, cebula, pomidory, czosnek, cytryna, jabłka, pietruszka, itd.",
     },
     nabial: {
       type: "array",
@@ -49,7 +49,7 @@ const schema = {
       type: "array",
       items: itemSchema,
       description:
-        "Lista składników konserwowych takich jak fasola, kukurydza, pomidory, musztarda, majonez, itd.",
+        "Lista składników konserwowych takich jak fasola, kukurydza, pomidory w puszce, musztarda, majonez, itd.",
     },
     pozostale: {
       type: "array",
