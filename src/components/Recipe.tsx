@@ -72,7 +72,7 @@ export const Recipe = ({ recipe }: { recipe: RecipeType }) => {
 
   return (
     <Flex alignItems="center" direction="column" className={css.container}>
-      <Box padding="m">
+      <Box padding={["s", "m"]}>
         <Flex alignItems="center">
           {referer ? (
             <Link onClick={handleLinkClick} href={referer}>
@@ -178,7 +178,7 @@ export const Recipe = ({ recipe }: { recipe: RecipeType }) => {
           )}
         </Flex>
       </Box>
-      <Box border noBorderRadius className={css.steps}>
+      <Box border noBorderRadius className={css.steps} padding={["s", "m"]}>
         <Flex
           direction="column"
           fullWidth
@@ -194,12 +194,21 @@ export const Recipe = ({ recipe }: { recipe: RecipeType }) => {
           <List spaced className={css.fullWidth}>
             {recipe.steps.map((step, index) => (
               <ListItem key={step.description} className={css.fullWidth}>
-                <ListItemIcon>
-                  <TextBit>{index + 1}</TextBit>
-                </ListItemIcon>
-                <Box padding="m" className={css.fullWidth}>
+                <Box padding={["s", "m"]} className={css.fullWidth}>
                   <Flex direction="column" fullWidth>
-                    <Text color="text-white">{step.description}</Text>
+                    <Text color="text-white" whiteSpace="pre-wrap">
+                      <TextBit
+                        style={{ padding: "10px 10px 10px 0px" }}
+                        as="span"
+                      >
+                        {index + 1}.
+                      </TextBit>
+
+                      {step.description
+                        .split(".")
+                        .map((sentence) => sentence.trim())
+                        .join(".\n\n")}
+                    </Text>
                     {step.photoPath ? (
                       <Image
                         src={step.photoPath}
@@ -207,6 +216,7 @@ export const Recipe = ({ recipe }: { recipe: RecipeType }) => {
                         height={200}
                         alt={step.description}
                         className={css.stepImage}
+                        style={{ marginTop: "10px" }}
                       ></Image>
                     ) : null}
                   </Flex>
