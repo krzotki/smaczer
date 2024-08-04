@@ -131,6 +131,7 @@ export const addRecipeFromUrl = (url: string, user: User) => {
                 console.log({ ingredientsCost });
                 const updateRes = await updateRecipe(COLLECTION_ALL_RECIPES, {
                   ...fullRecipe,
+                  user,
                   ingredientsCost,
                 });
                 console.log({ updateRes });
