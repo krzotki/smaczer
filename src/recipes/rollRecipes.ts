@@ -13,20 +13,11 @@ export const COLLECTION_WEEKLY_RECIPES = "recipes_weekly";
 
 const rng = new RandomLCG(Date.now());
 
-export const rollOneRecipe = () => {
+export const rollOneRecipe = (userId: string) => {
   return new Promise((resolve, reject) => {
     MongoClient.connect(dbUrl)
       .then(async (client) => {
         const db = client.db(dbName);
-
-        const collections = await db.listCollections().toArray();
-        const collectionNames = collections.map((c) => c.name);
-        const collectionName = COLLECTION_WEEKLY_RECIPES;
-
-        if (!collectionNames.includes(collectionName)) {
-          await db.createCollection(collectionName);
-          console.log(`Collection ${collectionName} created`);
-        }
 
         const recipes = await new Promise<Array<RecipeType>>(
           (resolve, reject) => {
@@ -66,11 +57,12 @@ export const rollOneRecipe = () => {
           }
         });
 
-        db.collection(collectionName)
+        db.collection(COLLECTION_WEEKLY_RECIPES)
           .insertMany(
             randomRecipes.map((recipe) => ({
               ...recipe,
               _id: new ObjectId(recipe._id),
+              owner: userId,
             }))
           )
           .then((result) => {
@@ -86,27 +78,18 @@ export const rollOneRecipe = () => {
         reject(error);
       });
   });
-}
+};
 
-export const rollWeeklyRecipes = () => {
+export const rollWeeklyRecipes = (userId: string) => {
   return new Promise((resolve, reject) => {
     MongoClient.connect(dbUrl)
       .then(async (client) => {
         const db = client.db(dbName);
 
-        const collections = await db.listCollections().toArray();
-        const collectionNames = collections.map((c) => c.name);
-        const collectionName = COLLECTION_WEEKLY_RECIPES;
-        if (!collectionNames.includes(collectionName)) {
-          await db.createCollection(collectionName);
-          console.log(`Collection ${collectionName} created`);
-        } else {
-          console.log(
-            `Collection ${collectionName} already exists. Clearing (droping and recreating) collection`
-          );
-          await db.dropCollection(collectionName);
-          await db.createCollection(collectionName);
-        }
+        // Delete all previous weekly recipes
+        await db
+          .collection(COLLECTION_WEEKLY_RECIPES)
+          .deleteMany({ owner: userId });
 
         const recipes = await new Promise<Array<RecipeType>>(
           (resolve, reject) => {
@@ -146,11 +129,12 @@ export const rollWeeklyRecipes = () => {
           }
         });
 
-        db.collection(collectionName)
+        db.collection(COLLECTION_WEEKLY_RECIPES)
           .insertMany(
             randomRecipes.map((recipe) => ({
               ...recipe,
               _id: new ObjectId(recipe._id),
+              owner: userId,
             }))
           )
           .then((result) => {

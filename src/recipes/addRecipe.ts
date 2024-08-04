@@ -1,5 +1,5 @@
 import { InsertOneResult, MongoClient, ObjectId } from "mongodb";
-import { RecipeType } from "./types";
+import { RecipeType, User } from "./types";
 import { dbName, dbUrl, openAIClient, pineconeStore } from "./config";
 import axios from "axios";
 import cheerio from "cheerio";
@@ -84,7 +84,7 @@ export const getIngredientsPrice = async (ingredients: string) => {
   return response.choices[0].message.content;
 };
 
-export const addRecipeFromUrl = (url: string) => {
+export const addRecipeFromUrl = (url: string, user: User) => {
   return new Promise<InsertOneResult>(async (resolve, reject) => {
     const regex = /https?:\/\/smaker\.pl\/[^\s]+/;
     const match = url.match(regex);
@@ -122,7 +122,7 @@ export const addRecipeFromUrl = (url: string) => {
 
         // Read Data from a Collection
         db.collection(COLLECTION_ALL_RECIPES)
-          .insertOne({ ...fullRecipe, _id })
+          .insertOne({ ...fullRecipe, _id, user })
           .then((result) => {
             client.close(); // Close the connection after the operation is complete
 
@@ -150,9 +150,13 @@ export const addRecipeFromUrl = (url: string) => {
   });
 };
 
-export const recalculateCost = (_id: string) => {
+export const recalculateCost = (_id: string, userId: string) => {
   return new Promise<{ success: boolean }>(async (resolve, reject) => {
     const recipe = await getRecipe(_id);
+    if (recipe.user.id !== userId) {
+      reject("Unauthorized");
+      return;
+    }
 
     try {
       const ingredientsCost = await getIngredientsPrice(

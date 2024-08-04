@@ -1,3 +1,4 @@
+import { auth } from "@/auth";
 import { getIngredientsPrice } from "@/recipes/addRecipe";
 import { getAllRecipes } from "@/recipes/getRecipes";
 import { COLLECTION_WEEKLY_RECIPES } from "@/recipes/rollRecipes";
@@ -10,30 +11,35 @@ import {
 import { google } from "googleapis";
 
 const sheets = google.sheets("v4");
-const auth = new google.auth.GoogleAuth({
-  keyFile: "./smaczer-c060515aa8c6.json",
-  scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-});
 
-google.options({ auth });
+google.options({
+  auth: new google.auth.GoogleAuth({
+    keyFile: "./smaczer-c060515aa8c6.json",
+    scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+  }),
+});
+/**
+ * @deprecated
+ * We will create a dedicated page for shopping list
+ */
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const update = searchParams.get("update");
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return Response.json({ error: "Unauthorized" });
+  }
 
   try {
     let list: SchemaType;
 
-    const weekly = await getAllRecipes(COLLECTION_WEEKLY_RECIPES);
+    const weekly = await getAllRecipes(
+      COLLECTION_WEEKLY_RECIPES,
+      session.user.id
+    );
 
-    const saved = await getSavedShoppingList();
-
-    if (saved[0] && !update) {
-      list = saved[0].parsed;
-    } else {
-      const result = await createShoppingList();
-      saveShoppingList(result);
-      list = result.parsed;
-    }
+    const result = await createShoppingList(session.user.id);
+    saveShoppingList(result, session.user.id);
+    list = result.parsed;
 
     const spreadsheetId = "1-JiwaI8l943B6Wbqh4yCVRLPMqh2wwOc38hr2t1EG-I";
     const range = "Sheet1!A2";
@@ -48,6 +54,10 @@ export async function GET(request: Request) {
       }
     });
 
+    if(weekly.length > rowsCount) {
+      rowsCount = weekly.length;
+    }
+
     for (let i = 0; i < rowsCount; i++) {
       let row: string[] = [];
       if (weekly[i]) {
@@ -61,7 +71,7 @@ export async function GET(request: Request) {
         row.push(arr[i] || "");
       });
 
-      sheetData.push(row); 
+      sheetData.push(row);
     }
 
     const request = {

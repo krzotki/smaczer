@@ -17,9 +17,6 @@ export async function POST(request: Request) {
     return Response.json({ error: "Unauthorized" });
   }
 
-  const collection =
-    type === "weekly" ? COLLECTION_WEEKLY_RECIPES : COLLECTION_ALL_RECIPES;
-
   try {
     if (type === "weekly") {
       const result = await removeWeeklyRecipe(_id, session.user.id);
