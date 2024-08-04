@@ -28,10 +28,6 @@ export const RecipeRollOne = () => {
     }
   }, []);
 
-  if (loading) {
-    return <Spinner />;
-  }
-
   return (
     <Flex
       className={`${css.box} ${css.roll}`}
@@ -51,7 +47,7 @@ export const RecipeRollOne = () => {
       />
       <Flex marginTop="l" marginBottom="s" justifyContent="center">
         <Headline color="text-green-40" size="small" align="to-center">
-          + Wylosuj dodatkowy obiad
+          {loading ? <Spinner /> : "+ Wylosuj dodatkowy obiad"}
         </Headline>
       </Flex>
     </Flex>

@@ -19,6 +19,15 @@ export const rollOneRecipe = (userId: string) => {
       .then(async (client) => {
         const db = client.db(dbName);
 
+        const collections = await db.listCollections().toArray();
+        const collectionNames = collections.map((c) => c.name);
+        const collectionName = COLLECTION_WEEKLY_RECIPES;
+
+        if (!collectionNames.includes(collectionName)) {
+          await db.createCollection(collectionName);
+          console.log(`Collection ${collectionName} created`);
+        }
+        
         const recipes = await new Promise<Array<RecipeType>>(
           (resolve, reject) => {
             db.collection(COLLECTION_ALL_RECIPES)
@@ -85,6 +94,14 @@ export const rollWeeklyRecipes = (userId: string) => {
     MongoClient.connect(dbUrl)
       .then(async (client) => {
         const db = client.db(dbName);
+
+        const collections = await db.listCollections().toArray();
+        const collectionNames = collections.map((c) => c.name);
+        const collectionName = COLLECTION_WEEKLY_RECIPES;
+        if (!collectionNames.includes(collectionName)) {
+          await db.createCollection(collectionName);
+          console.log(`Collection ${collectionName} created`);
+        } 
 
         // Delete all previous weekly recipes
         await db

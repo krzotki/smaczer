@@ -67,7 +67,7 @@ async function classifyProducts(ingredients: string) {
 
   const completion = await openAIClient.chat.completions.create({
     // model: "gpt-3.5-turbo-1106",
-    model: "gpt-4-1106-preview",
+    model: "gpt-4o",
     messages: [
       {
         role: "system",
@@ -107,7 +107,7 @@ async function sumProducts(currentIngredients: string, newIngredients: string) {
    `;
   const completion = await openAIClient.chat.completions.create({
     // model: "gpt-3.5-turbo-1106",
-    model: "gpt-4-1106-preview",
+    model: "gpt-4o",
     messages: [
       {
         role: "system",
@@ -153,6 +153,13 @@ export const saveShoppingList = async (
     MongoClient.connect(dbUrl)
       .then(async (client) => {
         const db = client.db(dbName);
+
+        const collections = await db.listCollections().toArray();
+        const collectionNames = collections.map((c) => c.name);
+        if (!collectionNames.includes(COLLECTION_SHOPPING_LIST)) {
+          await db.createCollection(COLLECTION_SHOPPING_LIST);
+          console.log(`Collection ${COLLECTION_SHOPPING_LIST} created`);
+        }
 
         db.collection(COLLECTION_SHOPPING_LIST)
           .insertOne({

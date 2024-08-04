@@ -57,7 +57,7 @@ export const getIngredientsPrice = async (ingredients: string) => {
   const response = await openAIClient.chat.completions.create({
     // model: "gpt-4-vision-preview",
     // model: "gpt-4",
-    model: "gpt-4-1106-preview",
+    model: "gpt-4o",
     temperature: 0.7,
     max_tokens: 1024,
     messages: [
