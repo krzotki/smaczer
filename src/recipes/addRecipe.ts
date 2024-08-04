@@ -178,7 +178,7 @@ export const recalculateCost = (_id: string) => {
   });
 };
 
-export const addRecipeToWeekly = (_id: string) => {
+export const addRecipeToWeekly = (_id: string, userId: string) => {
   return new Promise<InsertOneResult>(async (resolve, reject) => {
     const recipe = await getRecipe(_id);
 
@@ -187,7 +187,7 @@ export const addRecipeToWeekly = (_id: string) => {
         const db = client.db(dbName);
 
         db.collection(COLLECTION_WEEKLY_RECIPES)
-          .insertOne({ ...recipe, _id: new ObjectId(_id) })
+          .insertOne({ ...recipe, _id: new ObjectId(_id), owner: userId })
           .then((result) => {
             client.close();
 

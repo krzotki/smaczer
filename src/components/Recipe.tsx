@@ -176,6 +176,9 @@ export const Recipe = ({ recipe }: { recipe: RecipeType }) => {
               </Accordion>
             </Flex>
           )}
+          <Flex marginTop='s'>
+            <div>Autor: <strong>{recipe.user.name}</strong></div>
+          </Flex>
         </Flex>
       </Box>
       <Box border noBorderRadius className={css.steps} padding={["s", "m"]}>

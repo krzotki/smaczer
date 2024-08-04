@@ -1,3 +1,7 @@
 .header {
   max-width: min(1500px, 90%);
 }
+
+.popover {
+  z-index: 1;
+}

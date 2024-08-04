@@ -109,15 +109,9 @@ export interface Thumbnails {
 }
 
 export interface User {
-  id: number;
+  id: string;
   name: string;
   photoPath: string;
-  coverPath: any;
-  coverDefaultId: any;
-  thumbnails: Thumbnails2;
-  slug: any;
-  url: string;
-  likesCount: number;
 }
 
 export interface Thumbnails2 {

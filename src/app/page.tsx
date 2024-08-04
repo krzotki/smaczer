@@ -1,8 +1,9 @@
+import { auth } from "@/auth";
 import { AddRecipeButton } from "@/components/AddRecipeButton";
 import { AppLayout } from "@/components/AppLayout";
 import { ExportShoppingListButton } from "@/components/ExportShoppingListButton";
 import { Header } from "@/components/Header";
-import { RecipeRollOne } from "@/components/RecipeRollOne";
+
 import { RecipesList } from "@/components/RecipesList";
 import { RollWeeklyRecipesButton } from "@/components/RollWeeklyRecipesButton";
 import { getAllRecipes } from "@/recipes/getRecipes";
@@ -12,8 +13,13 @@ import { Box, Flex, Headline, TextBit } from "brainly-style-guide";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const recipes = await getAllRecipes(COLLECTION_WEEKLY_RECIPES);
-
+  const session = await auth();
+  const userId = session?.user?.id;
+  if (!userId) {
+    return null;
+  }
+  const recipes = await getAllRecipes(COLLECTION_WEEKLY_RECIPES, userId);
+  console.log({ session });
   return (
     <AppLayout header={<Header />}>
       <Flex marginTop="m" marginBottom="m" justifyContent="center">

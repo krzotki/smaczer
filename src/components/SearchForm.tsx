@@ -42,7 +42,7 @@ export const SearchForm = ({
           justifyContent={["space-between", "flex-start"]}
           marginLeft={["none", "l"]}
         >
-          <Flex marginRight={["none", "m", "m"]}>
+          <Flex marginRight={["none", "m", "m"]} fullWidth={[true, false]}>
             <Input
               placeholder="kurczak fasola ser"
               onChange={handleInputChange}
@@ -50,6 +50,7 @@ export const SearchForm = ({
               invalid={!!error}
               value={ingredients}
               className={css.input}
+              fullWidth
             />
           </Flex>
           <Flex>

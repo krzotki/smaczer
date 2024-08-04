@@ -1,10 +1,20 @@
 "use client";
 
-import { Box, Chip, Flex, Link, TextBit } from "brainly-style-guide";
+import {
+  Box,
+  Chip,
+  Flex,
+  Link,
+  TextBit,
+  Popover,
+  Button,
+  Text
+} from "brainly-style-guide";
 import { SearchForm } from "./SearchForm";
 import css from "./Header.module.scss";
 import { usePathname, useRouter } from "next/navigation";
-
+import { signOut, useSession } from "next-auth/react";
+import Image from "next/image";
 export const Header = ({
   initialIngredients,
 }: {
@@ -13,6 +23,30 @@ export const Header = ({
   const path = usePathname();
   const { push } = useRouter();
 
+  const { data: session } = useSession();
+  const user = session?.user;
+  const userMenu = user && (
+    <Popover>
+      <Popover.Trigger>
+        <Image
+          src={user?.image || ""}
+          alt="user avatar"
+          width={32}
+          height={32}
+        />
+      </Popover.Trigger>
+      <Popover.Element className={css.popover}>
+        <Flex direction="column" gap='s'>
+          <Text color='text-black'>
+            Zalogowano jako: <strong>{user?.name}</strong>
+          </Text>
+          <Button variant="outline" onClick={() => signOut()}>
+            Wyloguj
+          </Button>
+        </Flex>
+      </Popover.Element>
+    </Popover>
+  );
   return (
     <Flex direction={"column"} fullWidth className={css.header}>
       <Flex
@@ -21,12 +55,27 @@ export const Header = ({
         justifyContent={["center", "flex-start"]}
         alignItems="center"
       >
-        <Link href="/">
-          <Box padding={["xs", "m"]}>
-            <TextBit>Smaczer</TextBit>
-          </Box>
-        </Link>
+        <Flex
+          alignItems="center"
+          justifyContent="space-between"
+          fullWidth={[true, false]}
+        >
+          <Link href="/">
+            <Box padding={["xs", "m"]}>
+              <TextBit>Smaczer</TextBit>
+            </Box>
+          </Link>
+          <Flex
+            marginTop={["xs", "none"]}
+            marginRight={["xs", "none"]}
+            className="sg-hide-for-medium-up"
+          >
+            {userMenu}
+          </Flex>
+        </Flex>
+
         <SearchForm initialIngredients={initialIngredients} />
+        <div className="sg-hide-for-small-only">{userMenu}</div>
       </Flex>
 
       <Flex

@@ -88,7 +88,7 @@ export const RecipesList = ({
               iconOnly
               aria-label="remove recipe"
               icon={<Icon color="icon-gray-50" type="trash" />}
-              variant="transparent"
+              variant={loading === recipe._id ? "solid" : "transparent"}
               loading={recipe._id === loading}
               onClick={() => handleRemove(recipe._id)}
             />

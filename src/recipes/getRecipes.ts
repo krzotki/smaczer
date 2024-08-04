@@ -25,15 +25,15 @@ export type RecipeListItem = Pick<
   isInWeekly?: boolean;
 };
 
-export const getAllRecipes = (collection: string) => {
+export const getAllRecipes = (collection: string, userId?: string) => {
   return new Promise<RecipeType[]>((resolve, reject) => {
     MongoClient.connect(dbUrl)
       .then((client) => {
         const db = client.db(dbName);
-
+        console.log({ userId });
         // Read Data from a Collection
         db.collection(collection)
-          .find({})
+          .find(userId ? { owner: userId } : {})
           .toArray()
           .then((items) => {
             resolve(
@@ -187,21 +187,19 @@ export const getRecipesBySimilarity = async (
   const withData = await Promise.all(
     selected.map(async (doc) => {
       const recipe = doc.metadata as RecipeListItem;
-      const isInWeekly = !!weekly.find(
-        (r) => r._id === recipe._id.toString()
-      );
+      const isInWeekly = !!weekly.find((r) => r._id === recipe._id.toString());
 
       if (recipe.ingredientsCost) {
         return {
           ...recipe,
-          isInWeekly
+          isInWeekly,
         };
       }
       const fullRecipe = await getRecipe(recipe._id);
       return {
         ...recipe,
         ingredientsCost: fullRecipe.ingredientsCost,
-        isInWeekly
+        isInWeekly,
       };
     })
   );

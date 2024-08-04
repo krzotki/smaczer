@@ -12,6 +12,9 @@ const nextConfig = {
       {
         hostname: "staticsmaker.iplsc.com",
       },
+      {
+        hostname: "*.googleusercontent.com",
+      }
     ],
   },
 };
