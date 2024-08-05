@@ -27,35 +27,35 @@ export const authOptions: NextAuthOptions = {
       clientSecret,
     }),
   ],
-  callbacks: {
-    jwt: async ({ token, user }) => {
-      const existingUser = await getUser(String(token.sub));
-      token.savedUser = existingUser;
-      return token;
-    },
-    session: async ({ session, token }) => {
-      session.user = {
-        ...session.user,
-        id: token.sub,
-        // @ts-ignore
-        sharedWith: token.savedUser?.sharedWith || [],
-      };
-      return session;
-    },
-    signIn: async ({ user, account, profile }) => {
-      const existingUser = await getUser(String(user.id));
-      if (!existingUser) {
-        await saveUser({
-          id: user.id,
-          name: user.name || "",
-          email: user.email || "",
-          photoPath: user.image || "",
-        });
-      }
-      console.log({ existingUser });
-      return true;
-    },
-  },
+  // callbacks: {
+  //   jwt: async ({ token, user }) => {
+  //     const existingUser = await getUser(String(token.sub));
+  //     token.savedUser = existingUser;
+  //     return token;
+  //   },
+  //   session: async ({ session, token }) => {
+  //     session.user = {
+  //       ...session.user,
+  //       id: token.sub,
+  //       // @ts-ignore
+  //       sharedWith: token.savedUser?.sharedWith || [],
+  //     };
+  //     return session;
+  //   },
+  //   signIn: async ({ user, account, profile }) => {
+  //     const existingUser = await getUser(String(user.id));
+  //     if (!existingUser) {
+  //       await saveUser({
+  //         id: user.id,
+  //         name: user.name || "",
+  //         email: user.email || "",
+  //         photoPath: user.image || "",
+  //       });
+  //     }
+  //     console.log({ existingUser });
+  //     return true;
+  //   },
+  // },
 };
 
 // Use it in server contexts
