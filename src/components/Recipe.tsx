@@ -25,6 +25,7 @@ import { RecipeType } from "@/recipes/types";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { CostLabel } from "./CostLabel";
 import { revalidatePage } from "@/utils/revalidatePage";
+import { useSession } from "next-auth/react";
 
 export const getCostDescription = (cost: string) => {
   const lines = cost.split("\n");
@@ -69,6 +70,11 @@ export const Recipe = ({ recipe }: { recipe: RecipeType }) => {
       revalidatePage("/");
     }
   }, [recipe, currentPath]);
+
+  const { data: session } = useSession();
+  const user = session?.user;
+
+  const isAuthor = user?.id === recipe.user.id;
 
   return (
     <Flex alignItems="center" direction="column" className={css.container}>
@@ -157,27 +163,31 @@ export const Recipe = ({ recipe }: { recipe: RecipeType }) => {
                     <Text size="small" color="text-black">
                       {getCostDescription(recipe.ingredientsCost)}
                     </Text>
-                    <Button
-                      loading={loading}
-                      disabled={loading}
-                      onClick={recalculateCost}
-                      icon={
-                        <SubjectIcon
-                          monoColor="icon-white"
-                          size="small"
-                          type="mathematics"
-                        />
-                      }
-                    >
-                      Oblicz ponownie
-                    </Button>
+                    {isAuthor && (
+                      <Button
+                        loading={loading}
+                        disabled={loading}
+                        onClick={recalculateCost}
+                        icon={
+                          <SubjectIcon
+                            monoColor="icon-white"
+                            size="small"
+                            type="mathematics"
+                          />
+                        }
+                      >
+                        Oblicz ponownie
+                      </Button>
+                    )}
                   </Flex>
                 </AccordionItem>
               </Accordion>
             </Flex>
           )}
-          <Flex marginTop='s'>
-            <div>Autor: <strong>{recipe.user.name}</strong></div>
+          <Flex marginTop="s">
+            <div>
+              Autor: <strong>{recipe.user.name}</strong>
+            </div>
           </Flex>
         </Flex>
       </Box>

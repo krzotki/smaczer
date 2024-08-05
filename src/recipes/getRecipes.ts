@@ -20,7 +20,7 @@ export const COLLECTION_ALL_RECIPES = "recipes";
 
 export type RecipeListItem = Pick<
   RecipeType,
-  "_id" | "id" | "name" | "photoPath" | "ingredientsCost"
+  "_id" | "id" | "name" | "photoPath" | "ingredientsCost" | 'owner'
 > & {
   isInWeekly?: boolean;
 };

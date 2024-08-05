@@ -5,6 +5,7 @@ export interface RecipeType {
   _id: string;
   id: number;
   name: string;
+  owner?: string;
   slug: string;
   description: string;
   sponsored: boolean;
@@ -112,6 +113,8 @@ export interface User {
   id: string;
   name: string;
   photoPath: string;
+  email: string;
+  sharedWith?: string[];
 }
 
 export interface Thumbnails2 {

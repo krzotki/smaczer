@@ -22,6 +22,7 @@ import { CostLabel } from "./CostLabel";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { revalidatePage } from "@/utils/revalidatePage";
 import { RecipeRollOne } from "./RecipeRollOne";
+import { useSession } from "next-auth/react";
 
 const MAX_NAME_LENGTH = 30;
 
@@ -38,6 +39,9 @@ export const RecipesList = ({
   const currentPath = usePathname();
   const [loading, setLoading] = React.useState<string | undefined>(undefined);
   const query = useSearchParams();
+  const { data: session } = useSession();
+
+  const user = session?.user;
 
   const handleRemove = React.useCallback(
     async (_id: string) => {
@@ -79,6 +83,9 @@ export const RecipesList = ({
     [currentPath]
   );
   const getOption = (recipe: RecipeListItem) => {
+    if (weeklyRecipes && user?.id !== recipe.owner) {
+      return null;
+    }
     if (weeklyRecipes || recipe.isInWeekly) {
       return (
         <Tooltip>
