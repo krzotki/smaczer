@@ -14,6 +14,7 @@ export async function POST(request: Request) {
       id: session.user.id,
       name: session.user.name || "Anonim",
       photoPath: session.user.image || "",
+      email: session.user.email || "",
     });
 
     return Response.json(result);

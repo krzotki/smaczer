@@ -14,7 +14,7 @@ import React from "react";
 
 export const RecipeRollOne = () => {
   const [loading, setLoading] = React.useState(false);
-  const handleClick = React.useCallback(async () => {
+  const handleClick = async () => {
     if (loading) {
       return;
     }
@@ -26,7 +26,7 @@ export const RecipeRollOne = () => {
     if (data.acknowledged) {
       revalidatePage("/");
     }
-  }, []);
+  };
 
   return (
     <Flex
