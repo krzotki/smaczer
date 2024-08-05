@@ -152,29 +152,28 @@ export const saveShoppingList = async (
   return new Promise((resolve, reject) => {
     MongoClient.connect(dbUrl)
       .then(async (client) => {
-        const db = client.db(dbName);
+        try {
+          const db = client.db(dbName);
 
-        const collections = await db.listCollections().toArray();
-        const collectionNames = collections.map((c) => c.name);
-        if (!collectionNames.includes(COLLECTION_SHOPPING_LIST)) {
-          await db.createCollection(COLLECTION_SHOPPING_LIST);
-          console.log(`Collection ${COLLECTION_SHOPPING_LIST} created`);
-        }
+          const collections = await db.listCollections().toArray();
+          const collectionNames = collections.map((c) => c.name);
+          if (!collectionNames.includes(COLLECTION_SHOPPING_LIST)) {
+            await db.createCollection(COLLECTION_SHOPPING_LIST);
+            console.log(`Collection ${COLLECTION_SHOPPING_LIST} created`);
+          }
 
-        db.collection(COLLECTION_SHOPPING_LIST)
-          .insertOne({
+          const result = await db.collection(COLLECTION_SHOPPING_LIST).insertOne({
             ...shoppingList,
             owner: userId,
             date: Date.now(),
-          })
-          .then((result) => {
-            client.close();
-            resolve(result);
-          })
-          .catch((error) => {
-            client.close(); // Also close the connection in case of an error
-            reject(error);
           });
+
+          resolve(result);
+        } catch (error) {
+          reject(error);
+        } finally {
+          client.close(); // Close the connection after the operation is complete
+        }
       })
       .catch((error) => {
         console.log(error);
@@ -187,22 +186,20 @@ export const getSavedShoppingList = async (userId: string) => {
   return new Promise<Array<{ parsed: SchemaType }>>((resolve, reject) => {
     MongoClient.connect(dbUrl)
       .then(async (client) => {
-        const db = client.db(dbName);
+        try {
+          const db = client.db(dbName);
 
-        db.collection(COLLECTION_SHOPPING_LIST)
-          .find({
-            owner: userId,
-          })
-          .sort({ date: -1 })
-          .toArray()
-          .then((result) => {
-            client.close();
-            resolve(result as any);
-          })
-          .catch((error) => {
-            client.close(); // Also close the connection in case of an error
-            reject(error);
-          });
+          const result = await db.collection(COLLECTION_SHOPPING_LIST)
+            .find({ owner: userId })
+            .sort({ date: -1 })
+            .toArray();
+
+          resolve(result as any);
+        } catch (error) {
+          reject(error);
+        } finally {
+          client.close(); // Close the connection after the operation is complete
+        }
       })
       .catch((error) => {
         console.log(error);

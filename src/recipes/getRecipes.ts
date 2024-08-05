@@ -59,49 +59,45 @@ export const getRecipes = (page: number) => {
   return new Promise<RecipeListItem[]>((resolve, reject) => {
     MongoClient.connect(dbUrl)
       .then(async (client) => {
-        const db = client.db(dbName);
+        try {
+          const db = client.db(dbName);
 
-        const collections = await db.listCollections().toArray();
-        const collectionNames = collections.map((c) => c.name);
+          const collections = await db.listCollections().toArray();
+          const collectionNames = collections.map((c) => c.name);
 
-        if (!collectionNames.includes(COLLECTION_ALL_RECIPES)) {
-          await db.createCollection(COLLECTION_ALL_RECIPES);
+          if (!collectionNames.includes(COLLECTION_ALL_RECIPES)) {
+            await db.createCollection(COLLECTION_ALL_RECIPES);
+          }
+
+          if (!collectionNames.includes(COLLECTION_WEEKLY_RECIPES)) {
+            await db.createCollection(COLLECTION_WEEKLY_RECIPES);
+          }
+
+          const weekly = await getAllRecipes(COLLECTION_WEEKLY_RECIPES);
+
+          // Read Data from a Collection
+          const items = await db.collection(COLLECTION_ALL_RECIPES)
+            .find({})
+            .sort({ _id: 1 })
+            .skip((page - 1) * MAX_PAGE_SIZE)
+            .limit(MAX_PAGE_SIZE)
+            .toArray();
+
+          resolve(
+            items.map<RecipeListItem>((item) => ({
+              _id: item._id.toString(),
+              id: item.id,
+              name: item.name,
+              photoPath: item.photoPath,
+              ingredientsCost: item.ingredientsCost,
+              isInWeekly: !!weekly.find(
+                (recipe) => recipe._id === item._id.toString()
+              ),
+            }))
+          );
+        } finally {
+          client.close(); // Close the connection after the operation is complete
         }
-
-        if (!collectionNames.includes(COLLECTION_WEEKLY_RECIPES)) {
-          await db.createCollection(COLLECTION_WEEKLY_RECIPES);
-        }
-
-        const weekly = await getAllRecipes(COLLECTION_WEEKLY_RECIPES);
-
-        // Read Data from a Collection
-        db.collection(COLLECTION_ALL_RECIPES)
-          .find({})
-          .sort({
-            _id: 1,
-          })
-          .skip((page - 1) * MAX_PAGE_SIZE)
-          .limit(MAX_PAGE_SIZE)
-          .toArray()
-          .then((items) => {
-            resolve(
-              items.map<RecipeListItem>((item) => ({
-                _id: item._id.toString(),
-                id: item.id,
-                name: item.name,
-                photoPath: item.photoPath,
-                ingredientsCost: item.ingredientsCost,
-                isInWeekly: !!weekly.find(
-                  (recipe) => recipe._id === item._id.toString()
-                ),
-              }))
-            );
-            client.close(); // Close the connection after the operation is complete
-          })
-          .catch((error) => {
-            reject(error);
-            client.close(); // Also close the connection in case of an error
-          });
       })
       .catch((error) => {
         reject(error);
@@ -112,30 +108,26 @@ export const getRecipes = (page: number) => {
 export const getRecipe = (_id: string) => {
   return new Promise<RecipeType>((resolve, reject) => {
     MongoClient.connect(dbUrl)
-      .then((client) => {
-        const db = client.db(dbName);
+      .then(async (client) => {
+        try {
+          const db = client.db(dbName);
 
-        // Read Data from a Collection
-        db.collection(COLLECTION_ALL_RECIPES)
-          .findOne({
-            _id: new ObjectId(_id),
-          })
-          .then((item) => {
-            if (item) {
-              const { _id, ...rest } = item;
-              resolve({
-                ...(rest as RecipeType),
-                _id: _id.toString(),
-              });
-            } else {
-              reject("Recipe not found");
-            }
-            client.close();
-          })
-          .catch((error) => {
-            reject(error);
-            client.close();
-          });
+          // Read Data from a Collection
+          const item = await db.collection(COLLECTION_ALL_RECIPES)
+            .findOne({ _id: new ObjectId(_id) });
+
+          if (item) {
+            const { _id, ...rest } = item;
+            resolve({
+              ...(rest as RecipeType),
+              _id: _id.toString(),
+            });
+          } else {
+            reject("Recipe not found");
+          }
+        } finally {
+          client.close();
+        }
       })
       .catch((error) => {
         reject(error);

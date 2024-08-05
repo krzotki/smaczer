@@ -1,4 +1,4 @@
-import { MongoClient, ObjectId, OptionalId, WithId } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 import { dbName, dbUrl } from "./config";
 import { RandomLCG } from "@/utils/random";
 import { COLLECTION_ALL_RECIPES } from "./getRecipes";
@@ -17,71 +17,55 @@ export const rollOneRecipe = (userId: string) => {
   return new Promise((resolve, reject) => {
     MongoClient.connect(dbUrl)
       .then(async (client) => {
-        const db = client.db(dbName);
+        try {
+          const db = client.db(dbName);
 
-        const collections = await db.listCollections().toArray();
-        const collectionNames = collections.map((c) => c.name);
-        const collectionName = COLLECTION_WEEKLY_RECIPES;
+          const collections = await db.listCollections().toArray();
+          const collectionNames = collections.map((c) => c.name);
+          const collectionName = COLLECTION_WEEKLY_RECIPES;
 
-        if (!collectionNames.includes(collectionName)) {
-          await db.createCollection(collectionName);
-          console.log(`Collection ${collectionName} created`);
-        }
-        
-        const recipes = await new Promise<Array<RecipeType>>(
-          (resolve, reject) => {
-            db.collection(COLLECTION_ALL_RECIPES)
-              .find({})
-              .toArray()
-              .then((items) => {
-                resolve(
-                  items.map(({ _id, ...rest }) => ({
-                    ...(rest as RecipeType),
-                    _id: _id.toString(),
-                  }))
-                );
-              })
-              .catch((error) => {
-                reject(error);
-              });
+          if (!collectionNames.includes(collectionName)) {
+            await db.createCollection(collectionName);
+            console.log(`Collection ${collectionName} created`);
           }
-        );
 
-        const randomRecipes = rng.pickRandomElements(recipes, 1);
-
-        randomRecipes.forEach(async (recipe) => {
-          if (!recipe.ingredientsCost) {
-            getIngredientsPrice(ingredientsToString(recipe)).then(
-              async (cost) => {
-                await updateRecipe(COLLECTION_ALL_RECIPES, {
-                  ...recipe,
-                  ingredientsCost: cost,
-                });
-                await updateRecipe(COLLECTION_WEEKLY_RECIPES, {
-                  ...recipe,
-                  ingredientsCost: cost,
-                });
-              }
+          const recipes = await db
+            .collection(COLLECTION_ALL_RECIPES)
+            .find({})
+            .toArray()
+            .then((items) =>
+              items.map(({ _id, ...rest }) => ({
+                ...(rest as RecipeType),
+                _id: _id.toString(),
+              }))
             );
-          }
-        });
 
-        db.collection(COLLECTION_WEEKLY_RECIPES)
-          .insertMany(
-            randomRecipes.map((recipe) => ({
-              ...recipe,
-              _id: new ObjectId(recipe._id),
-              owner: userId,
-            }))
-          )
-          .then((result) => {
-            resolve(result);
-            client.close();
-          })
-          .catch((error) => {
-            reject(error);
-            client.close();
+          const randomRecipe = rng.pickRandomElements(recipes, 1)[0];
+
+          if (!randomRecipe.ingredientsCost) {
+            const cost = await getIngredientsPrice(ingredientsToString(randomRecipe));
+            await updateRecipe(COLLECTION_ALL_RECIPES, {
+              ...randomRecipe,
+              ingredientsCost: cost,
+            });
+            await updateRecipe(COLLECTION_WEEKLY_RECIPES, {
+              ...randomRecipe,
+              ingredientsCost: cost,
+            });
+          }
+
+          const result = await db.collection(COLLECTION_WEEKLY_RECIPES).insertOne({
+            ...randomRecipe,
+            _id: new ObjectId(randomRecipe._id),
+            owner: userId,
           });
+
+          resolve(result);
+        } catch (error) {
+          reject(error);
+        } finally {
+          client.close(); // Close the connection after the operation is complete
+        }
       })
       .catch((error) => {
         reject(error);
@@ -93,75 +77,62 @@ export const rollWeeklyRecipes = (userId: string) => {
   return new Promise((resolve, reject) => {
     MongoClient.connect(dbUrl)
       .then(async (client) => {
-        const db = client.db(dbName);
+        try {
+          const db = client.db(dbName);
 
-        const collections = await db.listCollections().toArray();
-        const collectionNames = collections.map((c) => c.name);
-        const collectionName = COLLECTION_WEEKLY_RECIPES;
-        if (!collectionNames.includes(collectionName)) {
-          await db.createCollection(collectionName);
-          console.log(`Collection ${collectionName} created`);
-        } 
+          const collections = await db.listCollections().toArray();
+          const collectionNames = collections.map((c) => c.name);
+          const collectionName = COLLECTION_WEEKLY_RECIPES;
 
-        // Delete all previous weekly recipes
-        await db
-          .collection(COLLECTION_WEEKLY_RECIPES)
-          .deleteMany({ owner: userId });
-
-        const recipes = await new Promise<Array<RecipeType>>(
-          (resolve, reject) => {
-            db.collection(COLLECTION_ALL_RECIPES)
-              .find({})
-              .toArray()
-              .then((items) => {
-                resolve(
-                  items.map(({ _id, ...rest }) => ({
-                    ...(rest as RecipeType),
-                    _id: _id.toString(),
-                  }))
-                );
-              })
-              .catch((error) => {
-                reject(error);
-              });
+          if (!collectionNames.includes(collectionName)) {
+            await db.createCollection(collectionName);
+            console.log(`Collection ${collectionName} created`);
           }
-        );
 
-        const randomRecipes = rng.pickRandomElements(recipes, 10);
+          // Delete all previous weekly recipes
+          await db.collection(COLLECTION_WEEKLY_RECIPES).deleteMany({ owner: userId });
 
-        randomRecipes.forEach(async (recipe) => {
-          if (!recipe.ingredientsCost) {
-            getIngredientsPrice(ingredientsToString(recipe)).then(
-              async (cost) => {
-                await updateRecipe(COLLECTION_ALL_RECIPES, {
-                  ...recipe,
-                  ingredientsCost: cost,
-                });
-                await updateRecipe(COLLECTION_WEEKLY_RECIPES, {
-                  ...recipe,
-                  ingredientsCost: cost,
-                });
-              }
+          const recipes = await db
+            .collection(COLLECTION_ALL_RECIPES)
+            .find({})
+            .toArray()
+            .then((items) =>
+              items.map(({ _id, ...rest }) => ({
+                ...(rest as RecipeType),
+                _id: _id.toString(),
+              }))
             );
-          }
-        });
 
-        db.collection(COLLECTION_WEEKLY_RECIPES)
-          .insertMany(
+          const randomRecipes = rng.pickRandomElements(recipes, 10);
+
+          for (const recipe of randomRecipes) {
+            if (!recipe.ingredientsCost) {
+              const cost = await getIngredientsPrice(ingredientsToString(recipe));
+              await updateRecipe(COLLECTION_ALL_RECIPES, {
+                ...recipe,
+                ingredientsCost: cost,
+              });
+              await updateRecipe(COLLECTION_WEEKLY_RECIPES, {
+                ...recipe,
+                ingredientsCost: cost,
+              });
+            }
+          }
+
+          const result = await db.collection(COLLECTION_WEEKLY_RECIPES).insertMany(
             randomRecipes.map((recipe) => ({
               ...recipe,
               _id: new ObjectId(recipe._id),
               owner: userId,
             }))
-          )
-          .then((result) => {
-            resolve(result);
-            client.close();
-          })
-          .catch((error) => {
-            reject(error);
-            client.close();
-          });
+          );
+
+          resolve(result);
+        } catch (error) {
+          reject(error);
+        } finally {
+          client.close(); // Close the connection after the operation is complete
+        }
       })
       .catch((error) => {
         reject(error);

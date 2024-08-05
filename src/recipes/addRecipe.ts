@@ -117,33 +117,30 @@ export const addRecipeFromUrl = (url: string, user: User) => {
     console.log({ indexRes });
 
     MongoClient.connect(dbUrl)
-      .then((client) => {
-        const db = client.db(dbName);
+      .then(async (client) => {
+        try {
+          const db = client.db(dbName);
 
         // Read Data from a Collection
-        db.collection(COLLECTION_ALL_RECIPES)
-          .insertOne({ ...fullRecipe, _id, user })
-          .then((result) => {
-            client.close(); // Close the connection after the operation is complete
+          const result = await db.collection(COLLECTION_ALL_RECIPES)
+          .insertOne({ ...fullRecipe, _id, user });
+          client.close(); // Close the connection after the operation is complete
 
-            getIngredientsPrice(ingredientsToString(recipe)).then(
-              async (ingredientsCost) => {
-                console.log({ ingredientsCost });
-                const updateRes = await updateRecipe(COLLECTION_ALL_RECIPES, {
-                  ...fullRecipe,
-                  user,
-                  ingredientsCost,
-                });
-                console.log({ updateRes });
-              }
-            );
+          const ingredientsCost = await getIngredientsPrice(ingredientsToString(recipe));
+          console.log({ ingredientsCost });
 
-            resolve(result);
-          })
-          .catch((error) => {
-            reject(error);
-            client.close(); // Also close the connection in case of an error
+          const updateRes = await updateRecipe(COLLECTION_ALL_RECIPES, {
+            ...fullRecipe,
+            user,
+            ingredientsCost,
           });
+          console.log({ updateRes });
+
+          resolve(result);
+        } catch (error) {
+          reject(error);
+          client.close(); // Also close the connection in case of an error
+        }
       })
       .catch((error) => {
         reject(error);
@@ -188,35 +185,31 @@ export const addRecipeToWeekly = (_id: string, userId: string) => {
     const recipe = await getRecipe(_id);
 
     MongoClient.connect(dbUrl)
-      .then((client) => {
-        const db = client.db(dbName);
+      .then(async (client) => {
+        try {
+          const db = client.db(dbName);
 
-        db.collection(COLLECTION_WEEKLY_RECIPES)
-          .insertOne({ ...recipe, _id: new ObjectId(_id), owner: userId })
-          .then((result) => {
-            client.close();
+          const result = await db.collection(COLLECTION_WEEKLY_RECIPES)
+          .insertOne({ ...recipe, _id: new ObjectId(_id), owner: userId });
+          client.close();
 
-            if (!recipe.ingredientsCost) {
-              getIngredientsPrice(ingredientsToString(recipe)).then(
-                async (ingredientsCost) => {
-                  await updateRecipe(COLLECTION_ALL_RECIPES, {
-                    _id,
-                    ingredientsCost,
-                  });
-                  await updateRecipe(COLLECTION_WEEKLY_RECIPES, {
-                    _id,
-                    ingredientsCost,
-                  });
-                }
-              );
-            }
+          if (!recipe.ingredientsCost) {
+            const ingredientsCost = await getIngredientsPrice(ingredientsToString(recipe));
+            await updateRecipe(COLLECTION_ALL_RECIPES, {
+              _id,
+              ingredientsCost,
+            });
+            await updateRecipe(COLLECTION_WEEKLY_RECIPES, {
+              _id,
+              ingredientsCost,
+            });
+          }
 
-            resolve(result);
-          })
-          .catch((error) => {
-            reject(error);
-            client.close();
-          });
+          resolve(result);
+        } catch (error) {
+          reject(error);
+          client.close();
+        }
       })
       .catch((error) => {
         reject(error);
@@ -230,11 +223,12 @@ export const updateRecipe = (
 ) => {
   return new Promise(async (resolve, reject) => {
     MongoClient.connect(dbUrl)
-      .then((client) => {
-        const db = client.db(dbName);
-        const { _id, ...rest } = recipe;
-        // Read Data from a Collection
-        db.collection(collection)
+      .then(async (client) => {
+        try {
+          const db = client.db(dbName);
+          const { _id, ...rest } = recipe;
+          // Read Data from a Collection
+          const result = await db.collection(collection)
           .updateOne(
             {
               _id: new ObjectId(recipe._id),
@@ -244,15 +238,14 @@ export const updateRecipe = (
                 ...rest,
               },
             }
-          )
-          .then((result) => {
-            resolve(result);
-            client.close(); // Close the connection after the operation is complete
-          })
-          .catch((error) => {
-            reject(error);
-            client.close(); // Also close the connection in case of an error
-          });
+          );
+
+          resolve(result);
+          client.close(); // Close the connection after the operation is complete
+        } catch (error) {
+          reject(error);
+          client.close(); // Also close the connection in case of an error
+        }
       })
       .catch((error) => {
         reject(error);
