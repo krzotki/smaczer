@@ -130,7 +130,7 @@ export const Header = ({
             </Box>
           </Link>
           <Flex
-            marginTop={["xs", "none"]}
+            marginTop={["xxs", "none"]}
             marginRight={["xs", "none"]}
             className="sg-hide-for-medium-up"
           >
