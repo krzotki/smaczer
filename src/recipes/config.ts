@@ -3,9 +3,13 @@ import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { PineconeStore } from "langchain/vectorstores/pinecone";
 import OpenAI from "openai";
 
-const MONGO_HOST = process.env.MONGO_HOST;
+const MONGO_HOST = process.env.CLOUD_MONGODB_HOST;
 
-export const dbUrl: string = `mongodb://root:example@${MONGO_HOST}:27017/?authSource=admin`;
+if (!MONGO_HOST) {
+  throw new Error("Missing MONGO_HOST environment variable");
+}
+
+export const dbUrl: string = MONGO_HOST;
 export const dbName: string = "recipes";
 
 // Instantiate a new Pinecone client, which will automatically read the
