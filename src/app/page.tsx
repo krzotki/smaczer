@@ -6,8 +6,6 @@ import { COLLECTION_WEEKLY_RECIPES } from "@/recipes/rollRecipes";
 
 import { redirect } from "next/navigation";
 
-export const dynamic = "force-dynamic";
-
 export default async function Home() {
   const session = await auth();
   const userId = session?.user?.id;
