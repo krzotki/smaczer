@@ -3,11 +3,8 @@ import { dbName, dbUrl } from "./config";
 import { RandomLCG } from "@/utils/random";
 import { COLLECTION_ALL_RECIPES } from "./getRecipes";
 import { RecipeType } from "./types";
-import {
-  getIngredientsPrice,
-  ingredientsToString,
-  updateRecipe,
-} from "./addRecipe";
+import { getIngredientsPrice, updateRecipe } from "./addRecipe";
+import { ingredientsToString } from "./utils";
 
 export const COLLECTION_WEEKLY_RECIPES = "recipes_weekly";
 

@@ -1,10 +1,10 @@
 import { MongoClient } from "mongodb";
-import { ingredientsToString } from "./addRecipe";
 import { dbName, dbUrl, openAIClient } from "./config";
 import { getAllRecipes } from "./getRecipes";
 import { COLLECTION_WEEKLY_RECIPES } from "./rollRecipes";
 import { RecipeType } from "./types";
 import type { FromSchema } from "json-schema-to-ts";
+import { ingredientsToString } from "./utils";
 
 export const COLLECTION_SHOPPING_LIST = "shopping_list";
 
@@ -85,7 +85,10 @@ export async function classifyProducts(ingredients: string) {
   return args;
 }
 
-export async function sumProducts(currentIngredients: string, newIngredients: string) {
+export async function sumProducts(
+  currentIngredients: string,
+  newIngredients: string
+) {
   const prompt = `Zsumuj ilości podanych składników. 
   Przykłady:
   - kurczak 300g + pierś z kurczaka 500g + 1 większy filet z kurczaka = 1100g kurczka (zakładając że 1 większy filet/pierś z kurczaka to 300g)
@@ -162,11 +165,13 @@ export const saveShoppingList = async (
             console.log(`Collection ${COLLECTION_SHOPPING_LIST} created`);
           }
 
-          const result = await db.collection(COLLECTION_SHOPPING_LIST).insertOne({
-            shoppingList,
-            owner: userId,
-            date: Date.now(),
-          });
+          const result = await db
+            .collection(COLLECTION_SHOPPING_LIST)
+            .insertOne({
+              shoppingList,
+              owner: userId,
+              date: Date.now(),
+            });
 
           resolve(result);
         } catch (error) {
@@ -189,7 +194,8 @@ export const getSavedShoppingList = async (userId: string) => {
         try {
           const db = client.db(dbName);
 
-          const result = await db.collection(COLLECTION_SHOPPING_LIST)
+          const result = await db
+            .collection(COLLECTION_SHOPPING_LIST)
             .find({ owner: userId })
             .sort({ date: -1 })
             .toArray();

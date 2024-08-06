@@ -5,17 +5,14 @@ import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { RandomLCG } from "@/utils/random";
 import { OpenAI } from "openai";
-import {
-  getIngredientsPrice,
-  ingredientsToString,
-  updateRecipe,
-} from "./addRecipe";
+
 import { Pinecone } from "@pinecone-database/pinecone";
 import { Document } from "langchain/document";
 import { PineconeStore } from "langchain/vectorstores/pinecone";
 import { COLLECTION_WEEKLY_RECIPES } from "./rollRecipes";
 import { getUsersThatAreSharingWithMe } from "@/auth";
 import { Session } from "next-auth";
+import { ingredientsToString } from "./utils";
 
 const MAX_PAGE_SIZE = 21;
 export const COLLECTION_ALL_RECIPES = "recipes";
@@ -234,7 +231,9 @@ export const getRecipesBySimilarity = async (
   const withData = await Promise.all(
     selected.map(async (doc) => {
       const recipe = doc.metadata as RecipeListItem;
-      const isInWeekly = !!weekly.find((r) => r.originalId === recipe._id.toString());
+      const isInWeekly = !!weekly.find(
+        (r) => r.originalId === recipe._id.toString()
+      );
 
       if (recipe.ingredientsCost) {
         return {
