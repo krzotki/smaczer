@@ -6,6 +6,7 @@ import Loading from "./loading";
 import { AppLayout } from "@/components/AppLayout";
 import { Header } from "@/components/Header";
 import { Flex, Box, TextBit } from "brainly-style-guide";
+import { auth } from "@/auth";
 
 export default async function Recipes({
   params,
@@ -13,7 +14,8 @@ export default async function Recipes({
   params: { ingredients: string };
 }) {
   const parsedIngredients = decodeURIComponent(params.ingredients);
-  const recipes = await getRecipesBySimilarity(parsedIngredients || "", 20);
+  const session = await auth();
+  const recipes = await getRecipesBySimilarity(parsedIngredients || "", 20, session);
 
   return (
     <Suspense fallback={<Loading />}>

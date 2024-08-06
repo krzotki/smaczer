@@ -43,7 +43,9 @@ export const rollOneRecipe = (userId: string) => {
           const randomRecipe = rng.pickRandomElements(recipes, 1)[0];
 
           if (!randomRecipe.ingredientsCost) {
-            const cost = await getIngredientsPrice(ingredientsToString(randomRecipe));
+            const cost = await getIngredientsPrice(
+              ingredientsToString(randomRecipe)
+            );
             await updateRecipe(COLLECTION_ALL_RECIPES, {
               ...randomRecipe,
               ingredientsCost: cost,
@@ -54,11 +56,14 @@ export const rollOneRecipe = (userId: string) => {
             });
           }
 
-          const result = await db.collection(COLLECTION_WEEKLY_RECIPES).insertOne({
-            ...randomRecipe,
-            _id: new ObjectId(randomRecipe._id),
-            owner: userId,
-          });
+          const result = await db
+            .collection(COLLECTION_WEEKLY_RECIPES)
+            .insertOne({
+              ...randomRecipe,
+              _id: new ObjectId(),
+              originalId: randomRecipe._id,
+              owner: userId,
+            });
 
           resolve(result);
         } catch (error) {
@@ -90,7 +95,9 @@ export const rollWeeklyRecipes = (userId: string) => {
           }
 
           // Delete all previous weekly recipes
-          await db.collection(COLLECTION_WEEKLY_RECIPES).deleteMany({ owner: userId });
+          await db
+            .collection(COLLECTION_WEEKLY_RECIPES)
+            .deleteMany({ owner: userId });
 
           const recipes = await db
             .collection(COLLECTION_ALL_RECIPES)
@@ -107,7 +114,9 @@ export const rollWeeklyRecipes = (userId: string) => {
 
           for (const recipe of randomRecipes) {
             if (!recipe.ingredientsCost) {
-              const cost = await getIngredientsPrice(ingredientsToString(recipe));
+              const cost = await getIngredientsPrice(
+                ingredientsToString(recipe)
+              );
               await updateRecipe(COLLECTION_ALL_RECIPES, {
                 ...recipe,
                 ingredientsCost: cost,
@@ -119,13 +128,16 @@ export const rollWeeklyRecipes = (userId: string) => {
             }
           }
 
-          const result = await db.collection(COLLECTION_WEEKLY_RECIPES).insertMany(
-            randomRecipes.map((recipe) => ({
-              ...recipe,
-              _id: new ObjectId(recipe._id),
-              owner: userId,
-            }))
-          );
+          const result = await db
+            .collection(COLLECTION_WEEKLY_RECIPES)
+            .insertMany(
+              randomRecipes.map((recipe) => ({
+                ...recipe,
+                _id: new ObjectId(),
+                originalId: recipe._id,
+                owner: userId,
+              }))
+            );
 
           resolve(result);
         } catch (error) {

@@ -4,6 +4,7 @@ export interface RecipeType {
   ingredientsCost?: string | null;
   _id: string;
   id: number;
+  originalId: string;
   name: string;
   owner?: string;
   slug: string;

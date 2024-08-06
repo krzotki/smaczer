@@ -22,7 +22,13 @@ export const COLLECTION_ALL_RECIPES = "recipes";
 
 export type RecipeListItem = Pick<
   RecipeType,
-  "_id" | "id" | "name" | "photoPath" | "ingredientsCost" | "owner"
+  | "_id"
+  | "id"
+  | "name"
+  | "photoPath"
+  | "ingredientsCost"
+  | "owner"
+  | "originalId"
 > & {
   isInWeekly?: boolean;
 };
@@ -94,8 +100,9 @@ export const getRecipes = (page: number) => {
               photoPath: item.photoPath,
               ingredientsCost: item.ingredientsCost,
               isInWeekly: !!weekly.find(
-                (recipe) => recipe._id === item._id.toString()
+                (recipe) => recipe.originalId === item._id.toString()
               ),
+              originalId: item._id.toString(),
             }))
           );
         } finally {
@@ -202,7 +209,7 @@ export const indexRecipes = async () => {
 export const getRecipesBySimilarity = async (
   ingredients: string,
   count: number,
-  session: Session
+  session: Session | null
 ): Promise<RecipeListItem[]> => {
   const vectorStore = await PineconeStore.fromExistingIndex(
     new OpenAIEmbeddings(),
@@ -217,7 +224,7 @@ export const getRecipesBySimilarity = async (
   if (!weekly.length && session?.user?.id) {
     const [sharedWithMe] = await getUsersThatAreSharingWithMe(session.user.id);
 
-    if(sharedWithMe) { 
+    if (sharedWithMe) {
       weekly = await getAllRecipes(COLLECTION_WEEKLY_RECIPES, sharedWithMe.id);
     }
   }
@@ -227,7 +234,7 @@ export const getRecipesBySimilarity = async (
   const withData = await Promise.all(
     selected.map(async (doc) => {
       const recipe = doc.metadata as RecipeListItem;
-      const isInWeekly = !!weekly.find((r) => r._id === recipe._id.toString());
+      const isInWeekly = !!weekly.find((r) => r.originalId === recipe._id.toString());
 
       if (recipe.ingredientsCost) {
         return {

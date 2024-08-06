@@ -121,12 +121,15 @@ export const addRecipeFromUrl = (url: string, user: User) => {
         try {
           const db = client.db(dbName);
 
-        // Read Data from a Collection
-          const result = await db.collection(COLLECTION_ALL_RECIPES)
-          .insertOne({ ...fullRecipe, _id, user });
+          // Read Data from a Collection
+          const result = await db
+            .collection(COLLECTION_ALL_RECIPES)
+            .insertOne({ ...fullRecipe, _id, user });
           client.close(); // Close the connection after the operation is complete
 
-          const ingredientsCost = await getIngredientsPrice(ingredientsToString(recipe));
+          const ingredientsCost = await getIngredientsPrice(
+            ingredientsToString(recipe)
+          );
           console.log({ ingredientsCost });
 
           const updateRes = await updateRecipe(COLLECTION_ALL_RECIPES, {
@@ -189,12 +192,20 @@ export const addRecipeToWeekly = (_id: string, userId: string) => {
         try {
           const db = client.db(dbName);
 
-          const result = await db.collection(COLLECTION_WEEKLY_RECIPES)
-          .insertOne({ ...recipe, _id: new ObjectId(_id), owner: userId });
+          const result = await db
+            .collection(COLLECTION_WEEKLY_RECIPES)
+            .insertOne({
+              ...recipe,
+              _id: new ObjectId(),
+              owner: userId,
+              originalId: _id,
+            });
           client.close();
 
           if (!recipe.ingredientsCost) {
-            const ingredientsCost = await getIngredientsPrice(ingredientsToString(recipe));
+            const ingredientsCost = await getIngredientsPrice(
+              ingredientsToString(recipe)
+            );
             await updateRecipe(COLLECTION_ALL_RECIPES, {
               _id,
               ingredientsCost,
@@ -228,8 +239,7 @@ export const updateRecipe = (
           const db = client.db(dbName);
           const { _id, ...rest } = recipe;
           // Read Data from a Collection
-          const result = await db.collection(collection)
-          .updateOne(
+          const result = await db.collection(collection).updateOne(
             {
               _id: new ObjectId(recipe._id),
             },

@@ -180,7 +180,11 @@ export const RecipesList = ({
               marginBottom="m"
               key={recipe._id}
             >
-              <Link href={`/recipe/${recipe._id}?referer=${currentPath}`}>
+              <Link
+                href={`/recipe/${
+                  weeklyRecipes ? recipe.originalId : recipe._id
+                }?referer=${currentPath}`}
+              >
                 <Image
                   src={recipe.photoPath}
                   alt={recipe.name}
