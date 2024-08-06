@@ -10,9 +10,7 @@ export default async function Home() {
   const session = await auth();
   const userId = session?.user?.id;
 
-  const recipes = await getAllRecipes(COLLECTION_WEEKLY_RECIPES, userId);
-
-  if (recipes.length === 0 && session?.user?.email) {
+  if (session?.user?.email) {
     const sharedWithMe = await getUsersThatAreSharingWithMe(session.user.email);
 
     if (sharedWithMe.length > 0) {
