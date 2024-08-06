@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+import { auth, getUser } from "@/auth";
 import { getIngredientsPrice } from "@/recipes/addRecipe";
 import { getAllRecipes } from "@/recipes/getRecipes";
 import { COLLECTION_WEEKLY_RECIPES } from "@/recipes/rollRecipes";
@@ -22,23 +22,38 @@ google.options({
  * @deprecated
  * We will create a dedicated page for shopping list
  */
-export async function GET(request: Request) {
+export async function POST(request: Request) {
+
+  const body = await request.json();
+  const owner = body.owner;
   const session = await auth();
 
   if (!session?.user?.id) {
     return Response.json({ error: "Unauthorized" });
   }
 
+  if (owner && session?.user?.id !== owner) {
+    const user = await getUser(owner);
+
+    if (
+      !session?.user?.email ||
+      !user?.sharedWith?.includes(session.user.email)
+    ) {
+      return Response.json({ error: "Unauthorized" });
+    }
+  }
+
+
   try {
     let list: SchemaType;
 
     const weekly = await getAllRecipes(
       COLLECTION_WEEKLY_RECIPES,
-      session.user.id
+      owner
     );
 
-    const result = await createShoppingList(session.user.id);
-    saveShoppingList(result, session.user.id);
+    const result = await createShoppingList(owner);
+    saveShoppingList(result, owner);
     list = result.parsed;
 
     const spreadsheetId = "1-JiwaI8l943B6Wbqh4yCVRLPMqh2wwOc38hr2t1EG-I";

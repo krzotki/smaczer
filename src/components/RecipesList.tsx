@@ -41,51 +41,64 @@ export const RecipesList = ({
   const query = useSearchParams();
   const { data: session } = useSession();
 
-  const user = session?.user;
+  const user = session?.user?.sharedWithMe;
+  console.log({ user });
 
-  const handleRemove = React.useCallback(
-    async (_id: string) => {
-      setLoading(_id);
-      const res = await fetch("/api/remove-recipe", {
-        method: "post",
-        body: JSON.stringify({
-          type: "weekly",
-          _id,
-        }),
-      });
-      const data = await res.json();
+  const handleRemoveConfirmation = async (_id: string, owner?: string) => {
+    setLoading(_id);
+    const res = await fetch("/api/remove-recipe", {
+      method: "post",
+      body: JSON.stringify({
+        type: "weekly",
+        _id,
+        owner,
+      }),
+    });
+    const data = await res.json();
 
-      setLoading(undefined);
-      if (data.acknowledged) {
-        revalidatePage(currentPath);
-      }
-    },
-    [currentPath]
-  );
-
-  const handleAdd = React.useCallback(
-    async (_id: string) => {
-      setLoading(_id);
-      const res = await fetch("/api/add-recipe-to-weekly", {
-        method: "post",
-        body: JSON.stringify({
-          _id,
-        }),
-      });
-      const data = await res.json();
-
-      setLoading(undefined);
-      if (data.acknowledged) {
-        revalidatePage("/");
-        revalidatePage(currentPath);
-      }
-    },
-    [currentPath]
-  );
-  const getOption = (recipe: RecipeListItem) => {
-    if (weeklyRecipes && user?.id !== recipe.owner) {
-      return null;
+    if (data.acknowledged) {
+      revalidatePage(currentPath);
     }
+
+    setLoading(undefined);
+  };
+
+  const handleRemove = async (_id: string) => {
+    if (!session?.user?.sharedWithMe?.length) {
+      return handleRemoveConfirmation(_id);
+    }
+
+    return handleRemoveConfirmation(_id, session.user.sharedWithMe[0].id);
+  };
+
+  const handleAddConfirmation = async (_id: string, owner?: string) => {
+    setLoading(_id);
+    const res = await fetch("/api/add-recipe-to-weekly", {
+      method: "post",
+      body: JSON.stringify({
+        _id,
+        owner,
+      }),
+    });
+    const data = await res.json();
+
+    if (data.acknowledged) {
+      revalidatePage("/");
+      revalidatePage(currentPath);
+    }
+
+    setLoading(undefined);
+  };
+
+  const handleAdd = (_id: string) => {
+    if (!session?.user?.sharedWithMe?.length) {
+      return handleAddConfirmation(_id);
+    }
+
+    return handleAddConfirmation(_id, session.user.sharedWithMe[0].id);
+  };
+
+  const getOption = (recipe: RecipeListItem) => {
     if (weeklyRecipes || recipe.isInWeekly) {
       return (
         <Tooltip>
@@ -112,7 +125,7 @@ export const RecipesList = ({
             iconOnly
             aria-label="add recipe"
             icon={<Icon color="icon-gray-50" type="add_more" />}
-            variant="transparent"
+            variant={loading === recipe._id ? "solid" : "transparent"}
             loading={recipe._id === loading}
             onClick={() => handleAdd(recipe._id)}
           />

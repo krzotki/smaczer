@@ -9,20 +9,26 @@ import {
   Text,
 } from "brainly-style-guide";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import React from "react";
 
 export const ExportShoppingListButton = () => {
   const [loading, setLoading] = React.useState(false);
   const [exported, setExported] = React.useState(false);
-  const handleClick = React.useCallback(async () => {
+  const params = useParams();
+  const handleClick = async () => {
     setLoading(true);
-    const res = await fetch("/api/export-to-sheets?update=1");
+    const res = await fetch("/api/export-to-sheets", {
+      method: "post",
+      body: JSON.stringify({
+        owner: params.userId,
+      }),
+    });
     const data = await res.json();
 
     setLoading(false);
     setExported(true);
-  }, []);
+  };
 
   return (
     <Flex

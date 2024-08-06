@@ -8,18 +8,26 @@ import {
 import css from "./RecipesList.module.scss";
 import Image from "next/image";
 import { revalidatePage } from "@/utils/revalidatePage";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useParams, usePathname, useSearchParams } from "next/navigation";
 
 import React from "react";
 
 export const RecipeRollOne = () => {
   const [loading, setLoading] = React.useState(false);
+
+  const params = useParams();
+  
   const handleClick = async () => {
     if (loading) {
       return;
     }
     setLoading(true);
-    const res = await fetch("/api/roll-single-recipe", { method: "post" });
+    const res = await fetch("/api/roll-single-recipe", {
+      method: "post",
+      body: JSON.stringify({
+        owner: params.userId,
+      }),
+    });
     const data = await res.json();
 
     setLoading(false);

@@ -22,7 +22,7 @@ export default async function Weekly({
   const userId = session?.user?.id;
   console.log({ session });
 
-  const getPage = async (owner: boolean) => {
+  const getPage = async () => {
     const recipes = await getAllRecipes(
       COLLECTION_WEEKLY_RECIPES,
       params.userId
@@ -38,24 +38,24 @@ export default async function Weekly({
           </Box>
         </Flex>
         <RecipesList recipes={recipes} weeklyRecipes />
-        {owner && (
-          <Flex
-            fullWidth
-            justifyContent="center"
-            direction={["column", "row"]}
-            alignItems={["center", "flex-start"]}
-          >
-            <ExportShoppingListButton />
-            <RollWeeklyRecipesButton />
-          </Flex>
-        )}
+
+        <Flex
+          fullWidth
+          justifyContent="center"
+          direction={["column", "row"]}
+          alignItems={["center", "flex-start"]}
+        >
+          <ExportShoppingListButton />
+          <RollWeeklyRecipesButton />
+        </Flex>
+
         <AddRecipeButton />
       </AppLayout>
     );
   };
 
   if (userId === params.userId) {
-    return getPage(true);
+    return getPage();
   }
 
   const owner = await getUser(params.userId);
@@ -73,7 +73,7 @@ export default async function Weekly({
     session?.user?.email && owner.sharedWith?.includes(session.user.email);
 
   if (isShared) {
-    return getPage(false);
+    return getPage();
   }
 
   return (

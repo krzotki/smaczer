@@ -1,7 +1,7 @@
 import type { NextAuthOptions } from "next-auth";
 
 import GoogleProvider from "next-auth/providers/google";
-import { getUser, saveUser } from "./users";
+import { getUser, getUsersThatAreSharingWithMe, saveUser } from "./users";
 
 const clientId = process.env.GOOGLE_CLIENT_ID;
 const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
@@ -26,6 +26,11 @@ export const authOptions: NextAuthOptions = {
     jwt: async ({ token, user }) => {
       const existingUser = await getUser(String(token.sub));
       token.savedUser = existingUser;
+
+      if (token.email) {
+        const sharedWithMe = await getUsersThatAreSharingWithMe(token.email);
+        token.sharedWithMe = sharedWithMe;
+      }
       return token;
     },
     session: async ({ session, token }) => {
@@ -34,6 +39,8 @@ export const authOptions: NextAuthOptions = {
         id: token.sub,
         // @ts-ignore
         sharedWith: token.savedUser?.sharedWith || [],
+        // @ts-ignore
+        sharedWithMe: token.sharedWithMe || [],
       };
       return session;
     },

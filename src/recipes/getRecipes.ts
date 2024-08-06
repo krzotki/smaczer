@@ -1,5 +1,5 @@
 import { MongoClient, ObjectId } from "mongodb";
-import { RecipeType } from "./types";
+import { RecipeType, User } from "./types";
 import { dbName, dbUrl, pineconeIndex } from "./config";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
@@ -14,13 +14,15 @@ import { Pinecone } from "@pinecone-database/pinecone";
 import { Document } from "langchain/document";
 import { PineconeStore } from "langchain/vectorstores/pinecone";
 import { COLLECTION_WEEKLY_RECIPES } from "./rollRecipes";
+import { getUsersThatAreSharingWithMe } from "@/auth";
+import { Session } from "next-auth";
 
 const MAX_PAGE_SIZE = 21;
 export const COLLECTION_ALL_RECIPES = "recipes";
 
 export type RecipeListItem = Pick<
   RecipeType,
-  "_id" | "id" | "name" | "photoPath" | "ingredientsCost" | 'owner'
+  "_id" | "id" | "name" | "photoPath" | "ingredientsCost" | "owner"
 > & {
   isInWeekly?: boolean;
 };
@@ -76,7 +78,8 @@ export const getRecipes = (page: number) => {
           const weekly = await getAllRecipes(COLLECTION_WEEKLY_RECIPES);
 
           // Read Data from a Collection
-          const items = await db.collection(COLLECTION_ALL_RECIPES)
+          const items = await db
+            .collection(COLLECTION_ALL_RECIPES)
             .find({})
             .sort({ _id: 1 })
             .skip((page - 1) * MAX_PAGE_SIZE)
@@ -113,7 +116,8 @@ export const getRecipe = (_id: string) => {
           const db = client.db(dbName);
 
           // Read Data from a Collection
-          const item = await db.collection(COLLECTION_ALL_RECIPES)
+          const item = await db
+            .collection(COLLECTION_ALL_RECIPES)
             .findOne({ _id: new ObjectId(_id) });
 
           if (item) {
@@ -124,6 +128,37 @@ export const getRecipe = (_id: string) => {
             });
           } else {
             reject("Recipe not found");
+          }
+        } finally {
+          client.close();
+        }
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+};
+
+export const getWeeklyRecipe = (_id: string, owner: string) => {
+  return new Promise<RecipeType | null>((resolve, reject) => {
+    MongoClient.connect(dbUrl)
+      .then(async (client) => {
+        try {
+          const db = client.db(dbName);
+
+          // Read Data from a Collection
+          const item = await db
+            .collection(COLLECTION_WEEKLY_RECIPES)
+            .findOne({ _id: new ObjectId(_id), owner });
+
+          if (item) {
+            const { _id, ...rest } = item;
+            resolve({
+              ...(rest as RecipeType),
+              _id: _id.toString(),
+            });
+          } else {
+            resolve(null);
           }
         } finally {
           client.close();
@@ -166,14 +201,27 @@ export const indexRecipes = async () => {
 
 export const getRecipesBySimilarity = async (
   ingredients: string,
-  count: number
+  count: number,
+  session: Session
 ): Promise<RecipeListItem[]> => {
   const vectorStore = await PineconeStore.fromExistingIndex(
     new OpenAIEmbeddings(),
     { pineconeIndex }
   );
 
-  const weekly = await getAllRecipes(COLLECTION_WEEKLY_RECIPES);
+  let weekly = await getAllRecipes(
+    COLLECTION_WEEKLY_RECIPES,
+    session?.user?.id
+  );
+
+  if (!weekly.length && session?.user?.id) {
+    const [sharedWithMe] = await getUsersThatAreSharingWithMe(session.user.id);
+
+    if(sharedWithMe) { 
+      weekly = await getAllRecipes(COLLECTION_WEEKLY_RECIPES, sharedWithMe.id);
+    }
+  }
+
   const selected = await vectorStore.similaritySearch(ingredients, count);
 
   const withData = await Promise.all(

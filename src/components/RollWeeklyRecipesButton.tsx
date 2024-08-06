@@ -2,28 +2,32 @@
 
 import { revalidatePage } from "@/utils/revalidatePage";
 import { Button, Flex, TextBit, Tooltip } from "brainly-style-guide";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import React from "react";
 
 export const RollWeeklyRecipesButton = () => {
   const [loading, setLoading] = React.useState(false);
-  const handleClick = React.useCallback(async () => {
+  const params = useParams();
+  const handleClick = async () => {
     setLoading(true);
-    const res = await fetch("/api/roll-recipes", { method: "post" });
+    const res = await fetch("/api/roll-recipes", {
+      method: "post",
+      body: JSON.stringify({ owner: params.userId }),
+    });
     const data = await res.json();
 
     setLoading(false);
     if (data.acknowledged) {
       revalidatePage("/");
     }
-  }, []);
+  };
 
   return (
     <Flex
       justifyContent="center"
       direction="column"
       alignItems="center"
-      margin='m'
+      margin="m"
     >
       {loading && (
         <Flex marginBottom="m">
