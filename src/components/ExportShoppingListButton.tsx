@@ -1,5 +1,7 @@
 "use client";
 
+import { ingredientsToString } from "@/recipes/utils";
+import { RecipeType } from "@/recipes/types";
 import {
   Button,
   Flex,
@@ -12,16 +14,72 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import React from "react";
 
-export const ExportShoppingListButton = () => {
+export const ExportShoppingListButton = ({
+  recipes,
+}: {
+  recipes: RecipeType[];
+}) => {
   const [loading, setLoading] = React.useState(false);
   const [exported, setExported] = React.useState(false);
   const params = useParams();
+
+  const [progress, setProgress] = React.useState("");
+
+  const sumProducts = async (currentSum: string, nextIngredients: string) => {
+    const res = await fetch("/api/sum-ingredients", {
+      method: "post",
+      body: JSON.stringify({
+        currentSum,
+        nextIngredients,
+      }),
+    });
+    const data = await res.json();
+    console.log({ data });
+    return data.summed;
+  };
+
+  const classifyShoppingList = async (shoppingList: string) => {
+    const res = await fetch("/api/classify-shopping-list", {
+      method: "post",
+      body: JSON.stringify({
+        shoppingList,
+      }),
+    });
+    const { classified, parsed } = await res.json();
+
+    return { classified, parsed };
+  };
+
   const handleClick = async () => {
     setLoading(true);
+
+    const ingredients = recipes.map(ingredientsToString);
+
+    let summed = ingredients[0];
+
+    setProgress(`Sumowanie składników (1/${ingredients.length})`);
+
+    for (let i = 1; i < ingredients.length; i++) {
+      console.log({ summed, recipe: recipes[i].name });
+      summed = await sumProducts(summed, ingredients[i]);
+      setProgress(`Sumowanie składników (${i + 1}/${ingredients.length})`);
+    }
+
+    console.log({ summed });
+
+    setProgress("Klasyfikowanie składników...");
+
+    const { parsed, classified } = await classifyShoppingList(summed);
+
+    console.log({ parsed, classified });
+
+    setProgress("Exportowanie do arkusza...");
+
     const res = await fetch("/api/export-to-sheets", {
       method: "post",
       body: JSON.stringify({
         owner: params.userId,
+        shoppingList: parsed,
       }),
     });
     const data = await res.json();
@@ -40,7 +98,7 @@ export const ExportShoppingListButton = () => {
       {loading && (
         <Flex marginBottom="m">
           <TextBit size="small" color="text-white">
-            Pobieram i sumuję składniki...
+            {progress}
           </TextBit>
         </Flex>
       )}

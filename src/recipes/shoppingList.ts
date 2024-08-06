@@ -62,7 +62,7 @@ const schema = {
 
 export type SchemaType = FromSchema<typeof schema>;
 
-async function classifyProducts(ingredients: string) {
+export async function classifyProducts(ingredients: string) {
   const prompt = `Zwróć listę wszystkich podanych produktów, przypisując je do odpowiednich kategorii, zachowując maksymalną długość znaków (30): ${ingredients}`;
 
   const completion = await openAIClient.chat.completions.create({
@@ -85,7 +85,7 @@ async function classifyProducts(ingredients: string) {
   return args;
 }
 
-async function sumProducts(currentIngredients: string, newIngredients: string) {
+export async function sumProducts(currentIngredients: string, newIngredients: string) {
   const prompt = `Zsumuj ilości podanych składników. 
   Przykłady:
   - kurczak 300g + pierś z kurczaka 500g + 1 większy filet z kurczaka = 1100g kurczka (zakładając że 1 większy filet/pierś z kurczaka to 300g)
@@ -163,7 +163,7 @@ export const saveShoppingList = async (
           }
 
           const result = await db.collection(COLLECTION_SHOPPING_LIST).insertOne({
-            ...shoppingList,
+            shoppingList,
             owner: userId,
             date: Date.now(),
           });

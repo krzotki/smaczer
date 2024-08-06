@@ -45,7 +45,7 @@ export default async function Weekly({
           direction={["column", "row"]}
           alignItems={["center", "flex-start"]}
         >
-          <ExportShoppingListButton />
+          <ExportShoppingListButton recipes={recipes} />
           <RollWeeklyRecipesButton />
         </Flex>
 

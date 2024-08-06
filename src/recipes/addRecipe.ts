@@ -10,6 +10,7 @@ import {
 } from "./getRecipes";
 import OpenAI from "openai";
 import { COLLECTION_WEEKLY_RECIPES } from "./rollRecipes";
+import { ingredientsToString } from "./utils";
 
 const exampleIngredients = `
 1/4 główki młodej kapusty
@@ -47,10 +48,6 @@ Całkowity koszt wymienionych składników, w oparciu o średnie ceny w Polsce, 
 TOTAL_COST=19.48
 `;
 
-export const ingredientsToString = (recipe: RecipeType) =>
-  recipe.ingredients
-    .map(({ items }) => items.map((item) => item.name).join("\n"))
-    .join("\n");
 
 export const getIngredientsPrice = async (ingredients: string) => {
   console.log("CALCULATING INGREDIENTS PRICE");

@@ -26,6 +26,7 @@ export async function POST(request: Request) {
 
   const body = await request.json();
   const owner = body.owner;
+  const shoppingList = body.shoppingList;
   const session = await auth();
 
   if (!session?.user?.id) {
@@ -52,9 +53,9 @@ export async function POST(request: Request) {
       owner
     );
 
-    const result = await createShoppingList(owner);
+    const result = shoppingList;
     saveShoppingList(result, owner);
-    list = result.parsed;
+    list = result;
 
     const spreadsheetId = "1-JiwaI8l943B6Wbqh4yCVRLPMqh2wwOc38hr2t1EG-I";
     const range = "Sheet1!A2";
