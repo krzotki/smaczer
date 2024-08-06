@@ -14,7 +14,14 @@ const sheets = google.sheets("v4");
 
 google.options({
   auth: new google.auth.GoogleAuth({
-    keyFile: "./smaczer-c060515aa8c6.json",
+    credentials: {
+      type: "service_account",
+      project_id: "smaczer",
+      private_key: process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY,
+      client_email: "smaczer@smaczer.iam.gserviceaccount.com",
+      client_id: process.env.GOOGLE_SERVICE_ACCOUNT_CLIENT_ID,
+      universe_domain: "googleapis.com",
+    },
     scopes: ["https://www.googleapis.com/auth/spreadsheets"],
   }),
 });
@@ -23,7 +30,6 @@ google.options({
  * We will create a dedicated page for shopping list
  */
 export async function POST(request: Request) {
-
   const body = await request.json();
   const owner = body.owner;
   const shoppingList = body.shoppingList;
@@ -44,17 +50,13 @@ export async function POST(request: Request) {
     }
   }
 
-
   try {
     let list: SchemaType;
 
-    const weekly = await getAllRecipes(
-      COLLECTION_WEEKLY_RECIPES,
-      owner
-    );
+    const weekly = await getAllRecipes(COLLECTION_WEEKLY_RECIPES, owner);
 
     const result = shoppingList;
-    saveShoppingList(result, owner);
+    await saveShoppingList(result, owner);
     list = result;
 
     const spreadsheetId = "1-JiwaI8l943B6Wbqh4yCVRLPMqh2wwOc38hr2t1EG-I";
@@ -70,7 +72,7 @@ export async function POST(request: Request) {
       }
     });
 
-    if(weekly.length > rowsCount) {
+    if (weekly.length > rowsCount) {
       rowsCount = weekly.length;
     }
 
@@ -118,6 +120,7 @@ export async function POST(request: Request) {
 
     return Response.json(list);
   } catch (e) {
+    console.error(e);
     return Response.json({ error: e });
   }
 }
