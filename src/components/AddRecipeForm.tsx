@@ -3,6 +3,8 @@
 import { Box, Button, Flex, Input } from "brainly-style-guide";
 import React from "react";
 import { useRouter } from "next/navigation";
+import { revalidatePage } from "@/utils/revalidatePage";
+import { useSession } from "next-auth/react";
 
 export const AddRecipeForm = () => {
   const [url, setUrl] = React.useState();
@@ -11,6 +13,31 @@ export const AddRecipeForm = () => {
   const router = useRouter();
 
   const [loading, setLoading] = React.useState(false);
+
+  const { data: session } = useSession();
+
+  const handleAddConfirmation = async (_id: string, owner?: string) => {
+    const res = await fetch("/api/add-recipe-to-weekly", {
+      method: "post",
+      body: JSON.stringify({
+        _id,
+        owner,
+      }),
+    });
+    const data = await res.json();
+
+    if (data.acknowledged) {
+      revalidatePage("/");
+    }
+  };
+
+  const handleAdd = (_id: string) => {
+    if (!session?.user?.sharedWithMe?.length) {
+      return handleAddConfirmation(_id);
+    }
+
+    return handleAddConfirmation(_id, session.user.sharedWithMe[0].id);
+  };
 
   const sendRecipe = React.useCallback(
     async (evt) => {
@@ -23,8 +50,6 @@ export const AddRecipeForm = () => {
         }),
       });
 
-      setLoading(false);
-
       const data = await response.json();
 
       if (data.error) {
@@ -33,6 +58,8 @@ export const AddRecipeForm = () => {
       }
 
       if (data.insertedId) {
+        await handleAdd(data.insertedId);
+        setLoading(false);
         router.push(`/recipe/${data.insertedId}`, { scroll: false });
       }
     },
