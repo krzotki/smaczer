@@ -108,9 +108,9 @@ export const RecipesList = ({
               iconOnly
               aria-label="remove recipe"
               icon={<Icon color="icon-gray-50" type="trash" />}
-              variant={loading === recipe._id ? "solid" : "transparent"}
-              loading={recipe._id === loading}
-              onClick={() => handleRemove(recipe._id)}
+              variant={loading === recipe.originalId ? "solid" : "transparent"}
+              loading={recipe.originalId === loading}
+              onClick={() => handleRemove(recipe.originalId)}
             />
           </Tooltip.Trigger>
         </Tooltip>
@@ -125,9 +125,9 @@ export const RecipesList = ({
             iconOnly
             aria-label="add recipe"
             icon={<Icon color="icon-gray-50" type="add_more" />}
-            variant={loading === recipe._id ? "solid" : "transparent"}
-            loading={recipe._id === loading}
-            onClick={() => handleAdd(recipe._id)}
+            variant={loading === recipe.originalId ? "solid" : "transparent"}
+            loading={recipe.originalId === loading}
+            onClick={() => handleAdd(recipe.originalId)}
           />
         </Tooltip.Trigger>
       </Tooltip>

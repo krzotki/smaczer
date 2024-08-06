@@ -32,10 +32,11 @@ export const removeWeeklyRecipe = (_id: string, userId: string) => {
     MongoClient.connect(dbUrl)
       .then(async (client) => {
         try {
+          console.log("removeWeeklyRecipe", _id, userId);
           const db = client.db(dbName);
           // Read Data from a Collection
           const result = await db.collection(COLLECTION_WEEKLY_RECIPES).deleteOne({
-            _id: new ObjectId(_id),
+            originalId: _id,
             owner: userId,
           });
           resolve(result);

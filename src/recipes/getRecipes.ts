@@ -246,6 +246,7 @@ export const getRecipesBySimilarity = async (
       return {
         ...recipe,
         ingredientsCost: fullRecipe.ingredientsCost,
+        originalId: fullRecipe._id,
         isInWeekly,
       };
     })
