@@ -40,6 +40,42 @@ export const getUser = (userId: string) => {
   });
 };
 
+export const getUserByEmail = (email: string) => {
+  return new Promise<User | null>((resolve, reject) => {
+    MongoClient.connect(dbUrl)
+      .then(async (client) => {
+        try {
+          const db = client.db(dbName);
+
+          const collections = await db.listCollections().toArray();
+          const collectionNames = collections.map((c) => c.name);
+
+          if (!collectionNames.includes(COLLECTION_USERS)) {
+            await db.createCollection(COLLECTION_USERS);
+            console.log(`Collection ${COLLECTION_USERS} created`);
+          }
+
+          let existingUser = await db
+            .collection(COLLECTION_USERS)
+            .findOne({ email });
+
+          if (existingUser) {
+            const { _id, ...user } = existingUser;
+            resolve(user as User);
+          } else {
+            resolve(null);
+          }
+        } finally {
+          client.close();
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        reject(error);
+      });
+  });
+};
+
 export const getUsersThatAreSharingWithMe = (email: string) => {
   return new Promise<User[]>((resolve, reject) => {
     MongoClient.connect(dbUrl)
@@ -121,6 +157,20 @@ export const shareWeeklyWithEmail = (userId: string, email: string) => {
     MongoClient.connect(dbUrl)
       .then(async (client) => {
         try {
+          const [alreadyShared] = await getUsersThatAreSharingWithMe(email);
+
+          if (alreadyShared) {
+            reject(new Error("Someone is already sharing with this user"));
+            return;
+          }
+
+          const otherUser = await getUserByEmail(email);
+
+          if (otherUser?.sharedWith?.length) {
+            reject(new Error("This user is already sharing with someone"));
+            return;
+          }
+
           const db = client.db(dbName);
 
           const user = await db

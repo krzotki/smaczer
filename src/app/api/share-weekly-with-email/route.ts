@@ -18,7 +18,8 @@ export async function POST(request: Request) {
     const result = await shareWeeklyWithEmail(session.user.id, body.email);
 
     return Response.json(result);
-  } catch (e) {
-    return Response.json({ error: e });
+  } catch (e: any) {
+    console.log({e})
+    return Response.json({ error: e.message });
   }
 }

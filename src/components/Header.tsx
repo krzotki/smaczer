@@ -67,9 +67,11 @@ export const Header = ({
           <Text color="text-black">
             Zalogowano jako: <strong>{user?.name}</strong>
           </Text>
-          <Button variant="solid" onClick={() => setShareModalOpen(true)}>
-            Udostępnij
-          </Button>
+          {!session.user?.sharedWithMe?.length && (
+            <Button variant="solid" onClick={() => setShareModalOpen(true)}>
+              Udostępnij
+            </Button>
+          )}
           <Button variant="outline" onClick={() => signOut()}>
             Wyloguj
           </Button>
