@@ -218,12 +218,11 @@ export const getRecipesBySimilarity = async (
     session?.user?.id
   );
 
-  if (!weekly.length && session?.user?.id) {
-    const [sharedWithMe] = await getUsersThatAreSharingWithMe(session.user.id);
-
-    if (sharedWithMe) {
-      weekly = await getAllRecipes(COLLECTION_WEEKLY_RECIPES, sharedWithMe.id);
-    }
+  if (session?.user?.sharedWithMe?.length) {
+    weekly = await getAllRecipes(
+      COLLECTION_WEEKLY_RECIPES,
+      session.user.sharedWithMe[0].id
+    );
   }
 
   const selected = await vectorStore.similaritySearch(ingredients, count);
