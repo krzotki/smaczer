@@ -80,7 +80,7 @@ export async function POST(request: Request) {
       let row: string[] = [];
       if (weekly[i]) {
         row.push(
-          `=HYPERLINK("${process.env.APP_URL}/recipe/${weekly[i]._id}", "${weekly[i].name}")`
+          `=HYPERLINK("${process.env.APP_URL}/recipe/${weekly[i].originalId}", "${weekly[i].name}")`
         );
       } else {
         row.push("");
