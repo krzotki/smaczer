@@ -48,7 +48,6 @@ Całkowity koszt wymienionych składników, w oparciu o średnie ceny w Polsce, 
 TOTAL_COST=19.48
 `;
 
-
 export const getIngredientsPrice = async (ingredients: string) => {
   console.log("CALCULATING INGREDIENTS PRICE");
   const response = await openAIClient.chat.completions.create({
@@ -101,6 +100,55 @@ export const addRecipeFromUrl = (url: string, user: User) => {
       return;
     }
 
+    const _id = new ObjectId(recipe.id);
+    const fullRecipe = {
+      ...recipe,
+      _id: _id.toString(),
+    };
+
+    const indexRes = await pineconeStore.addDocuments(
+      createDocumentsFromRecipes([fullRecipe])
+    );
+
+    console.log({ indexRes });
+
+    MongoClient.connect(dbUrl)
+      .then(async (client) => {
+        try {
+          const db = client.db(dbName);
+
+          // Read Data from a Collection
+          const result = await db
+            .collection(COLLECTION_ALL_RECIPES)
+            .insertOne({ ...fullRecipe, _id, user });
+          client.close(); // Close the connection after the operation is complete
+
+          const ingredientsCost = await getIngredientsPrice(
+            ingredientsToString(recipe)
+          );
+          console.log({ ingredientsCost });
+
+          const updateRes = await updateRecipe(COLLECTION_ALL_RECIPES, {
+            ...fullRecipe,
+            user,
+            ingredientsCost,
+          });
+          console.log({ updateRes });
+
+          resolve(result);
+        } catch (error) {
+          reject(error);
+          client.close(); // Also close the connection in case of an error
+        }
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+};
+
+export const addRecipeFromForm = (recipe: RecipeType, user: User) => {
+  return new Promise<InsertOneResult>(async (resolve, reject) => {
     const _id = new ObjectId(recipe.id);
     const fullRecipe = {
       ...recipe,

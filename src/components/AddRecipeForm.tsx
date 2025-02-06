@@ -10,10 +10,10 @@ export const AddRecipeForm = () => {
   const [url, setUrl] = React.useState();
 
   const [error, setError] = React.useState<string>();
-  const router = useRouter();
 
   const [loading, setLoading] = React.useState(false);
 
+  const router = useRouter();
   const { data: session } = useSession();
 
   const handleAddConfirmation = async (_id: string, owner?: string) => {
@@ -90,7 +90,7 @@ export const AddRecipeForm = () => {
             disabled={loading}
             loading={loading}
           >
-            Add recipe
+            Dodaj przepis ze Smakera
           </Button>
         </Flex>
       </Box>

@@ -25,10 +25,13 @@ export async function POST(request: Request) {
       },
     });
 
-    await uploader.done();
-    return new Response(JSON.stringify({ message: "Upload successful" }), {
-      status: 200,
-    });
+    const res = await uploader.done();
+    return new Response(
+      JSON.stringify({ message: "Upload successful", url: res.Location }),
+      {
+        status: 200,
+      }
+    );
   } catch (error) {
     console.error("Upload failed", error);
     return new Response(JSON.stringify({ error: "Failed to upload file" }), {

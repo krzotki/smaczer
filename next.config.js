@@ -14,6 +14,9 @@ const nextConfig = {
       },
       {
         hostname: "*.googleusercontent.com",
+      },
+      {
+        hostname: "kr-smaczer-images.s3.eu-north-1.amazonaws.com"
       }
     ],
   },
