@@ -113,7 +113,7 @@ export const getRecipes = (page: number) => {
 };
 
 export const getRecipe = (_id: string) => {
-  return new Promise<RecipeType>((resolve, reject) => {
+  return new Promise<RecipeType | null>((resolve, reject) => {
     MongoClient.connect(dbUrl)
       .then(async (client) => {
         try {
@@ -131,7 +131,7 @@ export const getRecipe = (_id: string) => {
               _id: _id.toString(),
             });
           } else {
-            reject("Recipe not found");
+            resolve(null);
           }
         } finally {
           client.close();
@@ -230,6 +230,7 @@ export const getRecipesBySimilarity = async (
   const withData = await Promise.all(
     selected.map(async (doc) => {
       const recipe = doc.metadata as RecipeListItem;
+      console.log({ doc });
       const isInWeekly = !!weekly.find(
         (r) => r.originalId === recipe._id.toString()
       );
@@ -241,6 +242,14 @@ export const getRecipesBySimilarity = async (
         };
       }
       const fullRecipe = await getRecipe(recipe._id);
+
+      if (!fullRecipe) {
+        // await vectorStore.delete({
+        //   ids: [doc.metadata.id],
+        // });
+        return null;
+      }
+
       return {
         ...recipe,
         ingredientsCost: fullRecipe.ingredientsCost,
@@ -250,5 +259,7 @@ export const getRecipesBySimilarity = async (
     })
   );
 
-  return withData;
+  return withData.filter(filterTruthy);
 };
+
+const filterTruthy = <T>(value: T | null): value is T => value !== null;

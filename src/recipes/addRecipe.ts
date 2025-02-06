@@ -1,4 +1,10 @@
-import { InsertOneResult, MongoClient, ObjectId } from "mongodb";
+import {
+  Document,
+  InsertOneResult,
+  MongoClient,
+  ObjectId,
+  UpdateResult,
+} from "mongodb";
 import { RecipeType, User } from "./types";
 import { dbName, dbUrl, openAIClient, pineconeStore } from "./config";
 import axios from "axios";
@@ -196,10 +202,37 @@ export const addRecipeFromForm = (recipe: RecipeType, user: User) => {
   });
 };
 
+export const editRecipe = (recipe: RecipeType, user: User) => {
+  return new Promise<UpdateResult>(async (resolve, reject) => {
+    MongoClient.connect(dbUrl)
+      .then(async (client) => {
+        try {
+          const ingredientsCost = await getIngredientsPrice(
+            ingredientsToString(recipe)
+          );
+
+          const updateRes = await updateRecipe(COLLECTION_ALL_RECIPES, {
+            ...recipe,
+            user,
+            ingredientsCost,
+          });
+
+          resolve(updateRes);
+        } catch (error) {
+          reject(error);
+          client.close(); // Also close the connection in case of an error
+        }
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+};
+
 export const recalculateCost = (_id: string, userId: string) => {
   return new Promise<{ success: boolean }>(async (resolve, reject) => {
     const recipe = await getRecipe(_id);
-    if (recipe.user.id !== userId) {
+    if (recipe?.user.id !== userId) {
       reject("Unauthorized");
       return;
     }
@@ -247,7 +280,7 @@ export const addRecipeToWeekly = (_id: string, userId: string) => {
             });
           client.close();
 
-          if (!recipe.ingredientsCost) {
+          if (recipe && !recipe?.ingredientsCost) {
             const ingredientsCost = await getIngredientsPrice(
               ingredientsToString(recipe)
             );
@@ -276,7 +309,7 @@ export const addRecipeToWeekly = (_id: string, userId: string) => {
 export const updateRecipe = (
   collection: string,
   recipe: Partial<RecipeType>
-) => {
+): Promise<UpdateResult<Document>> => {
   return new Promise(async (resolve, reject) => {
     MongoClient.connect(dbUrl)
       .then(async (client) => {

@@ -71,6 +71,22 @@ export const Recipe = ({ recipe }: { recipe: RecipeType }) => {
     }
   }, [recipe, currentPath]);
 
+  const removeRecipe = React.useCallback(async () => {
+    setLoading(true);
+    const res = await fetch("/api/remove-recipe", {
+      method: "post",
+      body: JSON.stringify({
+        _id: recipe._id,
+      }),
+    });
+    const data = await res.json();
+
+    setLoading(false);
+    if (data.acknowledged) {
+      push("/");
+    }
+  }, [recipe, currentPath]);
+
   const { data: session } = useSession();
   const user = session?.user;
 
@@ -164,20 +180,42 @@ export const Recipe = ({ recipe }: { recipe: RecipeType }) => {
                       {getCostDescription(recipe.ingredientsCost)}
                     </Text>
                     {isAuthor && (
-                      <Button
-                        loading={loading}
-                        disabled={loading}
-                        onClick={recalculateCost}
-                        icon={
-                          <SubjectIcon
-                            monoColor="icon-white"
-                            size="small"
-                            type="mathematics"
-                          />
-                        }
-                      >
-                        Oblicz ponownie
-                      </Button>
+                      <Flex gap="m">
+                        <Button
+                          loading={loading}
+                          disabled={loading}
+                          onClick={recalculateCost}
+                          icon={
+                            <SubjectIcon
+                              monoColor="icon-white"
+                              size="small"
+                              type="mathematics"
+                            />
+                          }
+                        >
+                          Oblicz ponownie
+                        </Button>
+                        <Button
+                          loading={loading}
+                          disabled={loading}
+                          onClick={() => push(`/recipe/${recipe._id}/edit`)}
+                          icon={
+                            <Icon color="icon-white" size={16} type="pencil" />
+                          }
+                        >
+                          Edytuj
+                        </Button>
+                        <Button
+                          loading={loading}
+                          disabled={loading}
+                          onClick={removeRecipe}
+                          icon={
+                            <Icon color="icon-white" size={16} type="trash" />
+                          }
+                        >
+                          Usuń przepis
+                        </Button>
+                      </Flex>
                     )}
                   </Flex>
                 </AccordionItem>

@@ -1,3 +1,6 @@
+import { AppLayout } from "@/components/AppLayout";
+import { EditRecipeForm } from "@/components/EditRecipeForm";
+import { Header } from "@/components/Header";
 import { Recipe as RecipeView } from "@/components/Recipe";
 import { getRecipe } from "@/recipes/getRecipes";
 import { Flex, Headline } from "brainly-style-guide";
@@ -11,16 +14,17 @@ export default async function Recipe({ params }: { params: { id: string } }) {
     return null;
   }
   return (
-    <div>
-      <Head>
-        <title>{recipe.name}</title>
-      </Head>
-      <RecipeView recipe={recipe} />
-    </div>
+    <AppLayout header={<Header />}>
+      <EditRecipeForm recipeToEdit={recipe} />
+    </AppLayout>
   );
 }
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: { id: string };
+}): Promise<Metadata> {
   const recipe = await getRecipe(params.id);
   if (!recipe) {
     return {};
