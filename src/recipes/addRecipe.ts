@@ -17,6 +17,7 @@ import {
 import OpenAI from "openai";
 import { COLLECTION_WEEKLY_RECIPES } from "./rollRecipes";
 import { ingredientsToString } from "./utils";
+import { migrate } from "@/utils/migrate";
 
 const exampleIngredients = `
 1/4 główki młodej kapusty
@@ -133,13 +134,15 @@ export const addRecipeFromUrl = (url: string, user: User) => {
             ingredientsToString(recipe)
           );
           console.log({ ingredientsCost });
-
-          const updateRes = await updateRecipe(COLLECTION_ALL_RECIPES, {
+          const updated = {
             ...fullRecipe,
             user,
             ingredientsCost,
-          });
+          };
+          const updateRes = await updateRecipe(COLLECTION_ALL_RECIPES, updated);
           console.log({ updateRes });
+
+          await migrate([updated]);
 
           resolve(result);
         } catch (error) {

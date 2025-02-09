@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
 import { NewRecipeType, RecipeEditor } from "./RecipeEditor";
+import { revalidatePage } from "@/utils/revalidatePage";
 
 export const EditRecipeForm = ({
   recipeToEdit,
@@ -32,15 +33,15 @@ export const EditRecipeForm = ({
 
       const data = await response.json();
 
-      if (data.insertedId) {
-        setLoading(false);
-        router.push(`/recipe/${data.insertedId}`, { scroll: false });
-      }
+      setLoading(false);
+      revalidatePage("/");
+      revalidatePage(`/recipe/${recipeToEdit.id}`);
+      router.push(`/recipe/${recipeToEdit.id}`, { scroll: false });
     },
     [recipe, router]
   );
 
-  console.log({recipe})
+  console.log({ recipe });
 
   return (
     <Flex marginTop="m" direction="column" gap="l" alignItems="center">

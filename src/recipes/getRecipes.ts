@@ -235,12 +235,6 @@ export const getRecipesBySimilarity = async (
         (r) => r.originalId === recipe._id.toString()
       );
 
-      if (recipe.ingredientsCost) {
-        return {
-          ...recipe,
-          isInWeekly,
-        };
-      }
       const fullRecipe = await getRecipe(recipe._id);
 
       if (!fullRecipe) {
@@ -251,8 +245,7 @@ export const getRecipesBySimilarity = async (
       }
 
       return {
-        ...recipe,
-        ingredientsCost: fullRecipe.ingredientsCost,
+        ...fullRecipe,
         originalId: fullRecipe._id,
         isInWeekly,
       };
