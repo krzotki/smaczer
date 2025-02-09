@@ -7,7 +7,7 @@ import { Header } from "@/components/Header";
 
 import { RecipesList } from "@/components/RecipesList";
 import { RollWeeklyRecipesButton } from "@/components/RollWeeklyRecipesButton";
-import { getAllRecipes } from "@/recipes/getRecipes";
+import { getMappedWeeklyRecipes } from "@/recipes/getRecipes";
 import { COLLECTION_WEEKLY_RECIPES } from "@/recipes/rollRecipes";
 import { Box, Flex, Headline, TextBit } from "brainly-style-guide";
 
@@ -23,11 +23,7 @@ export default async function Weekly({
   console.log({ session });
 
   const getPage = async () => {
-    const recipes = await getAllRecipes(
-      COLLECTION_WEEKLY_RECIPES,
-      params.userId
-    );
-
+    const recipes = await getMappedWeeklyRecipes(userId);
     return (
       <AppLayout header={<Header />}>
         <Flex marginTop="m" marginBottom="m" justifyContent="center">

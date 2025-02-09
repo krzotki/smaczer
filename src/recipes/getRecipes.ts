@@ -262,4 +262,16 @@ export const getRecipesBySimilarity = async (
   return withData.filter(filterTruthy);
 };
 
-const filterTruthy = <T>(value: T | null): value is T => value !== null;
+export const filterTruthy = <T>(value: T | null): value is T => value !== null;
+
+export const getMappedWeeklyRecipes = async (userId?: string) => {
+  const weekly = await getAllRecipes(COLLECTION_WEEKLY_RECIPES, userId);
+  const mapped = await Promise.all(
+    weekly.map(async (recipe) => ({
+      ...(await getRecipe(recipe.originalId)),
+      ...recipe,
+    }))
+  );
+
+  return mapped.filter(filterTruthy);
+};

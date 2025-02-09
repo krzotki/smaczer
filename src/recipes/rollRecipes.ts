@@ -47,16 +47,11 @@ export const rollOneRecipe = (userId: string) => {
               ...randomRecipe,
               ingredientsCost: cost,
             });
-            await updateRecipe(COLLECTION_WEEKLY_RECIPES, {
-              ...randomRecipe,
-              ingredientsCost: cost,
-            });
           }
 
           const result = await db
             .collection(COLLECTION_WEEKLY_RECIPES)
             .insertOne({
-              ...randomRecipe,
               _id: new ObjectId(),
               originalId: randomRecipe._id,
               owner: userId,
@@ -118,10 +113,6 @@ export const rollWeeklyRecipes = (userId: string) => {
                 ...recipe,
                 ingredientsCost: cost,
               });
-              await updateRecipe(COLLECTION_WEEKLY_RECIPES, {
-                ...recipe,
-                ingredientsCost: cost,
-              });
             }
           }
 
@@ -129,7 +120,6 @@ export const rollWeeklyRecipes = (userId: string) => {
             .collection(COLLECTION_WEEKLY_RECIPES)
             .insertMany(
               randomRecipes.map((recipe) => ({
-                ...recipe,
                 _id: new ObjectId(),
                 originalId: recipe._id,
                 owner: userId,

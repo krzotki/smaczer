@@ -246,10 +246,6 @@ export const recalculateCost = (_id: string, userId: string) => {
         _id,
         ingredientsCost,
       });
-      await updateRecipe(COLLECTION_WEEKLY_RECIPES, {
-        _id,
-        ingredientsCost,
-      });
       resolve({
         success: true,
       });
@@ -273,7 +269,6 @@ export const addRecipeToWeekly = (_id: string, userId: string) => {
           const result = await db
             .collection(COLLECTION_WEEKLY_RECIPES)
             .insertOne({
-              ...recipe,
               _id: new ObjectId(),
               owner: userId,
               originalId: _id,
@@ -285,10 +280,6 @@ export const addRecipeToWeekly = (_id: string, userId: string) => {
               ingredientsToString(recipe)
             );
             await updateRecipe(COLLECTION_ALL_RECIPES, {
-              _id,
-              ingredientsCost,
-            });
-            await updateRecipe(COLLECTION_WEEKLY_RECIPES, {
               _id,
               ingredientsCost,
             });

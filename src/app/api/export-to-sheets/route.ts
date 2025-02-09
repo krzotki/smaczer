@@ -1,6 +1,12 @@
 import { auth, getUser } from "@/auth";
 import { getIngredientsPrice } from "@/recipes/addRecipe";
-import { getAllRecipes } from "@/recipes/getRecipes";
+import {
+  COLLECTION_ALL_RECIPES,
+  filterTruthy,
+  getAllRecipes,
+  getMappedWeeklyRecipes,
+  getRecipe,
+} from "@/recipes/getRecipes";
 import { COLLECTION_WEEKLY_RECIPES } from "@/recipes/rollRecipes";
 import {
   SchemaType,
@@ -53,7 +59,7 @@ export async function POST(request: Request) {
   try {
     let list: SchemaType;
 
-    const weekly = await getAllRecipes(COLLECTION_WEEKLY_RECIPES, owner);
+    const weekly = await getMappedWeeklyRecipes(owner);
 
     const result = shoppingList;
     await saveShoppingList(result, owner);
