@@ -22,7 +22,7 @@ export default async function Weekly({
   const userId = session?.user?.id;
   console.log({ session });
 
-  const getPage = async () => {
+  const getPage = async (userId: string) => {
     const recipes = await getMappedWeeklyRecipes(userId);
     return (
       <AppLayout header={<Header />}>
@@ -51,7 +51,7 @@ export default async function Weekly({
   };
 
   if (userId === params.userId) {
-    return getPage();
+    return getPage(userId);
   }
 
   const owner = await getUser(params.userId);
@@ -69,7 +69,7 @@ export default async function Weekly({
     session?.user?.email && owner.sharedWith?.includes(session.user.email);
 
   if (isShared) {
-    return getPage();
+    return getPage(owner.id);
   }
 
   return (
