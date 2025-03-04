@@ -210,14 +210,9 @@ export const editRecipe = (recipe: RecipeType, user: User) => {
     MongoClient.connect(dbUrl)
       .then(async (client) => {
         try {
-          const ingredientsCost = await getIngredientsPrice(
-            ingredientsToString(recipe)
-          );
-
           const updateRes = await updateRecipe(COLLECTION_ALL_RECIPES, {
             ...recipe,
             user,
-            ingredientsCost,
           });
 
           resolve(updateRes);

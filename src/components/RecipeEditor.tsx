@@ -15,7 +15,10 @@ import {
 import React from "react";
 import Image from "next/image";
 
-export type NewRecipeType = Pick<RecipeType, "id" | "name" | "photoPath"> & {
+export type NewRecipeType = Pick<
+  RecipeType,
+  "id" | "name" | "photoPath" | "_id"
+> & {
   thumbnails: {
     xl: string;
   };

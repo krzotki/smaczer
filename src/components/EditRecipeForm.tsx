@@ -32,11 +32,11 @@ export const EditRecipeForm = ({
       });
 
       const data = await response.json();
-
+      console.log({data})
       setLoading(false);
       revalidatePage("/");
-      revalidatePage(`/recipe/${recipeToEdit.id}`);
-      router.push(`/recipe/${recipeToEdit.id}`, { scroll: false });
+      revalidatePage(`/recipe/${recipeToEdit._id}`);
+      router.push(`/recipe/${recipeToEdit._id}`, { scroll: false });
     },
     [recipe, router]
   );
