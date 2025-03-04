@@ -13,6 +13,7 @@ import { COLLECTION_WEEKLY_RECIPES } from "./rollRecipes";
 import { getUsersThatAreSharingWithMe } from "@/auth";
 import { Session } from "next-auth";
 import { ingredientsToString } from "./utils";
+import { removeWeeklyRecipe } from "./removeRecipe";
 
 const MAX_PAGE_SIZE = 21;
 export const COLLECTION_ALL_RECIPES = "recipes";
@@ -260,10 +261,17 @@ export const filterTruthy = <T>(value: T | null): value is T => value !== null;
 export const getMappedWeeklyRecipes = async (userId?: string) => {
   const weekly = await getAllRecipes(COLLECTION_WEEKLY_RECIPES, userId);
   const mapped = await Promise.all(
-    weekly.map(async (recipe) => ({
-      ...(await getRecipe(recipe.originalId)),
-      ...recipe,
-    }))
+    weekly.map(async (recipe) => {
+      const fullRecipe = await getRecipe(recipe.originalId);
+      if (!fullRecipe) {
+        await removeWeeklyRecipe(recipe._id, userId as string);
+        return null;
+      }
+      return {
+        ...fullRecipe,
+        ...recipe,
+      };
+    })
   );
 
   return mapped.filter(filterTruthy);
