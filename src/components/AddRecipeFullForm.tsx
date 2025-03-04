@@ -23,6 +23,7 @@ import Image from "next/image";
 import { NewRecipeType, RecipeEditor } from "./RecipeEditor";
 
 const defaultRecipe = {
+  _id: '',
   id: Date.now(),
   name: "Nowy przepis",
   ingredients: [
