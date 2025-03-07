@@ -20,7 +20,6 @@ export default async function Weekly({
 }) {
   const session = await auth();
   const userId = session?.user?.id;
-  console.log({ session });
 
   const getPage = async (userId: string) => {
     const recipes = await getMappedWeeklyRecipes(userId);

@@ -32,7 +32,6 @@ export const EditRecipeForm = ({
       });
 
       const data = await response.json();
-      console.log({ data });
       setLoading(false);
       revalidatePage("/");
       revalidatePage(`/recipe/${recipeToEdit._id}`);
@@ -40,8 +39,6 @@ export const EditRecipeForm = ({
     },
     [recipe, router, recipeToEdit]
   );
-
-  console.log({ recipe });
 
   return (
     <Flex marginTop="m" direction="column" gap="l" alignItems="center">

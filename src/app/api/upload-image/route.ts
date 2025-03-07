@@ -14,7 +14,6 @@ export async function POST(request: Request) {
   const formData = await request.formData();
   const body = Object.fromEntries(formData);
   const file = (body.file as File) || null;
-  console.log({ formData, body, file });
   try {
     const uploader = new Upload({
       client: s3Client,

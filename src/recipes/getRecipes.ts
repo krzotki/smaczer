@@ -36,7 +36,7 @@ export const getAllRecipes = (collection: string, userId?: string) => {
     MongoClient.connect(dbUrl)
       .then((client) => {
         const db = client.db(dbName);
-        console.log({ userId });
+
         // Read Data from a Collection
         db.collection(collection)
           .find(userId ? { owner: userId } : {})
@@ -231,7 +231,7 @@ export const getRecipesBySimilarity = async (
   const withData = await Promise.all(
     selected.map(async (doc) => {
       const recipe = doc.metadata as RecipeListItem;
-      console.log({ doc });
+
       const isInWeekly = !!weekly.find(
         (r) => r.originalId === recipe._id.toString()
       );

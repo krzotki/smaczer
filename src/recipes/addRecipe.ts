@@ -60,8 +60,8 @@ export const getIngredientsPrice = async (ingredients: string) => {
   const response = await openAIClient.chat.completions.create({
     // model: "gpt-4-vision-preview",
     // model: "gpt-4",
-    model: "gpt-4o",
-    temperature: 0.7,
+    model: "o3-mini-2025-01-31",
+    // temperature: 0.7,
     max_tokens: 1024,
     messages: [
       {
@@ -117,8 +117,6 @@ export const addRecipeFromUrl = (url: string, user: User) => {
       createDocumentsFromRecipes([fullRecipe])
     );
 
-    console.log({ indexRes });
-
     MongoClient.connect(dbUrl)
       .then(async (client) => {
         try {
@@ -133,14 +131,13 @@ export const addRecipeFromUrl = (url: string, user: User) => {
           const ingredientsCost = await getIngredientsPrice(
             ingredientsToString(recipe)
           );
-          console.log({ ingredientsCost });
+
           const updated = {
             ...fullRecipe,
             user,
             ingredientsCost,
           };
           const updateRes = await updateRecipe(COLLECTION_ALL_RECIPES, updated);
-          console.log({ updateRes });
 
           await migrate([updated]);
 
@@ -168,8 +165,6 @@ export const addRecipeFromForm = (recipe: RecipeType, user: User) => {
       createDocumentsFromRecipes([fullRecipe])
     );
 
-    console.log({ indexRes });
-
     MongoClient.connect(dbUrl)
       .then(async (client) => {
         try {
@@ -184,14 +179,12 @@ export const addRecipeFromForm = (recipe: RecipeType, user: User) => {
           const ingredientsCost = await getIngredientsPrice(
             ingredientsToString(recipe)
           );
-          console.log({ ingredientsCost });
 
           const updateRes = await updateRecipe(COLLECTION_ALL_RECIPES, {
             ...fullRecipe,
             user,
             ingredientsCost,
           });
-          console.log({ updateRes });
 
           resolve(result);
         } catch (error) {

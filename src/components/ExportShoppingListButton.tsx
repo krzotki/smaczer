@@ -34,7 +34,6 @@ export const ExportShoppingListButton = ({
       }),
     });
     const data = await res.json();
-    console.log({ data });
     return data.summed;
   };
 
@@ -60,18 +59,13 @@ export const ExportShoppingListButton = ({
     setProgress(`Sumowanie składników (1/${ingredients.length})`);
 
     for (let i = 1; i < ingredients.length; i++) {
-      console.log({ summed, recipe: recipes[i].name });
       summed = await sumProducts(summed, ingredients[i]);
       setProgress(`Sumowanie składników (${i + 1}/${ingredients.length})`);
     }
 
-    console.log({ summed });
-
     setProgress("Klasyfikowanie składników...");
 
     const { parsed, classified } = await classifyShoppingList(summed);
-
-    console.log({ parsed, classified });
 
     setProgress("Exportowanie do arkusza...");
 

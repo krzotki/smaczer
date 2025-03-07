@@ -42,7 +42,6 @@ export const RecipesList = ({
   const { data: session } = useSession();
 
   const user = session?.user?.sharedWithMe;
-  console.log({recipes})
 
   const handleRemoveConfirmation = async (_id: string, owner?: string) => {
     setLoading(_id);

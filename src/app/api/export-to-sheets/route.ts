@@ -62,6 +62,7 @@ export async function POST(request: Request) {
     const weekly = await getMappedWeeklyRecipes(owner);
 
     const result = shoppingList;
+
     await saveShoppingList(result, owner);
     list = result;
 
@@ -115,7 +116,6 @@ export async function POST(request: Request) {
     await sheets.spreadsheets.values.update(
       request,
       (err: any, response: any) => {
-        console.log({ response });
         if (err) {
           console.error(err);
           return;

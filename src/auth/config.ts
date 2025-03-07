@@ -54,7 +54,6 @@ export const authOptions: NextAuthOptions = {
           photoPath: user.image || "",
         });
       }
-      console.log({ existingUser });
       return true;
     },
   },

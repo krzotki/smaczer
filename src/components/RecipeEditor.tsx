@@ -96,7 +96,6 @@ export const RecipeEditor = ({
         <Input
           type="file"
           onChange={(e: any) => {
-            console.log(e.target);
             uploadFile(e.target.files ? e.target.files[0] : null);
           }}
         />

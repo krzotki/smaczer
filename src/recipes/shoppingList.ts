@@ -72,7 +72,7 @@ export async function classifyProducts(ingredients: string) {
 
   const completion = await openAIClient.chat.completions.create({
     // model: "gpt-3.5-turbo-1106",
-    model: "gpt-4o",
+    model: "o3-mini-2025-01-31",
     messages: [
       {
         role: "system",
@@ -82,7 +82,7 @@ export async function classifyProducts(ingredients: string) {
     ],
     functions: [{ name: "set_recipe", parameters: schema }],
     function_call: { name: "set_recipe" },
-    temperature: 0,
+    // temperature: 0,
   });
 
   const args = completion.choices[0].message.function_call?.arguments || "{}";
@@ -115,7 +115,7 @@ export async function sumProducts(
    `;
   const completion = await openAIClient.chat.completions.create({
     // model: "gpt-3.5-turbo-1106",
-    model: "gpt-4o",
+    model: "o3-mini-2025-01-31",
     messages: [
       {
         role: "system",
@@ -123,7 +123,7 @@ export async function sumProducts(
       },
       { role: "user", content: prompt },
     ],
-    temperature: 0,
+    // temperature: 0,
   });
 
   const summed = completion.choices[0].message.content;
@@ -142,7 +142,6 @@ export const createShoppingList = async (userId: string) => {
   let summed = ingredients[0];
 
   for (let i = 1; i < ingredients.length; i++) {
-    console.log({ summed, recipe: recipes[i].name });
     summed = await sumProducts(summed, ingredients[i]);
   }
 
