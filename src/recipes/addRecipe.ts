@@ -62,7 +62,6 @@ export const getIngredientsPrice = async (ingredients: string) => {
     // model: "gpt-4",
     model: "o3-mini-2025-01-31",
     // temperature: 0.7,
-    max_tokens: 1024,
     messages: [
       {
         role: "system",
@@ -79,9 +78,6 @@ export const getIngredientsPrice = async (ingredients: string) => {
         content: ingredients,
       },
     ],
-    top_p: 1,
-    frequency_penalty: 0,
-    presence_penalty: 0.6,
   });
   console.log("FINISHED CALCULATING INGREDIENTS PRICE");
   return response.choices[0].message.content;
